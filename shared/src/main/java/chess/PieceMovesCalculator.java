@@ -1,17 +1,21 @@
 package chess;
 
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PieceMovesCalculator {
     ChessBoard board;
     ChessPosition myPosition;
     ChessPiece piece;
+    int my_x; int my_y;
 
     public PieceMovesCalculator(ChessBoard board, ChessPosition myPosition) {
         this.board = board;
         this.myPosition = myPosition;
         this.piece = board.getPiece(myPosition);
+        this.my_x = myPosition.getRow();
+        this.my_y = myPosition.getColumn();
     }
 
     public Collection<ChessMove> calculateMoves() {
@@ -26,27 +30,69 @@ public class PieceMovesCalculator {
 
     //I need to return a LIST of ChessMove objects, each object takes ChessMove Takes start position, end position, and promotionPiece as a parameter
     // For example return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1, 8), null
+    private boolean isInBounds (int x, int y) {
+        return (x > 0 && x < 8) && (y > 0 && y < 8);
+    }
+
     private Collection<ChessMove> KingMovesCalculator() {
-        return null;
+        List<ChessMove> possibleMoves = new ArrayList<>();
+        return possibleMoves;
     }
 
     private Collection<ChessMove> QueenMovesCalculator() {
-        return null;
+        List<ChessMove> possibleMoves = new ArrayList<>();
+        return possibleMoves;
     }
 
     private Collection<ChessMove> KnightMovesCalculator() {
-        return null;
+        List<ChessMove> possibleMoves = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (!(my_x == i && my_y == j)) { //if it's not my space
+                    double distance = Math.sqrt(Math.pow((my_x - i), 2) + Math.pow((my_y - j), 2));
+                    ChessPosition newPosition = new ChessPosition(i, j);
+                    if (distance == Math.sqrt(5) && (board.getPiece(newPosition) == null || board.getPiece(newPosition).getTeamColor() != piece.getTeamColor())) {
+                        possibleMoves.add(new ChessMove(new ChessPosition(my_x, my_y), newPosition, null));
+                    }
+                }
+            }
+        }
+        return possibleMoves;
     }
 
     private Collection<ChessMove> PawnMovesCalculator() {
-        return null;
+        List<ChessMove> possibleMoves = new ArrayList<>();
+        return possibleMoves;
     }
 
     private Collection<ChessMove> BishopMovesCalculator() {
-        return null;
+        List<ChessMove> possibleMoves = new ArrayList<>();
+        return possibleMoves;
     }
 
     private Collection<ChessMove> RookMovesCalculator() {
-        return null;
+        List<ChessMove> possibleMoves = new ArrayList<>();
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int[] direction : directions){
+            int x = direction[0];
+            int y = direction[1];
+
+            while (isInBounds(my_x + x, my_y + y)) {
+                ChessPosition targetPosition = new ChessPosition(my_x + x, my_y + y);
+                ChessPiece targetPiece = board.getPiece(targetPosition);
+
+                if (targetPiece == null) {
+                    possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+                    if (x != 0) x = x < 0 ? x - 1 : x + 1;
+                    if (y != 0) y = y < 0 ? y - 1 : y + 1;
+                } else {
+                    if (targetPiece.getTeamColor() != piece.getTeamColor()) {
+                        possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+                    }
+                    break;
+                }
+            }
+        }
+        return possibleMoves;
     }
 }

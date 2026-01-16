@@ -11,12 +11,10 @@ public class ChessMove {
     private final ChessPosition endPosition;
     private final ChessPiece.PieceType promotionPiece;
 
-    public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
-                     ChessPiece.PieceType promotionPiece, ChessPosition startPosition1, ChessPosition endPosition1, ChessPosition promotionPiece1, ChessPosition startPosition2, ChessPosition endPosition2, ChessPiece.PieceType promotionPiece2) {
-
-        this.startPosition = startPosition2;
-        this.endPosition = endPosition2;
-        this.promotionPiece = promotionPiece2;
+    public ChessMove(ChessPosition startPosition, ChessPosition endPosition, ChessPiece.PieceType promotionPiece) {
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+        this.promotionPiece = promotionPiece;
     }
 
     /**
