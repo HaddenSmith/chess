@@ -31,33 +31,22 @@ public class PieceMovesCalculator {
     //I need to return a LIST of ChessMove objects, each object takes ChessMove Takes start position, end position, and promotionPiece as a parameter
     // For example return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1, 8), null
     private boolean isInBounds (int x, int y) {
-        return (x > 0 && x < 8) && (y > 0 && y < 8);
+        return (x >= 0 && x < 8) && (y >= 0 && y < 8);
     }
 
     private Collection<ChessMove> KingMovesCalculator() {
-        List<ChessMove> possibleMoves = new ArrayList<>();
-        return possibleMoves;
+        int [][] offsets = {{1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}};
+        return generateStepMoves(offsets);
     }
 
     private Collection<ChessMove> QueenMovesCalculator() {
-        List<ChessMove> possibleMoves = new ArrayList<>();
-        return possibleMoves;
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}, {-1, 1}, {1, -1}};
+        return generateSlidingMoves(directions);
     }
 
     private Collection<ChessMove> KnightMovesCalculator() {
-        List<ChessMove> possibleMoves = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (!(my_x == i && my_y == j)) { //if it's not my space
-                    double distance = Math.sqrt(Math.pow((my_x - i), 2) + Math.pow((my_y - j), 2));
-                    ChessPosition newPosition = new ChessPosition(i, j);
-                    if (distance == Math.sqrt(5) && (board.getPiece(newPosition) == null || board.getPiece(newPosition).getTeamColor() != piece.getTeamColor())) {
-                        possibleMoves.add(new ChessMove(new ChessPosition(my_x, my_y), newPosition, null));
-                    }
-                }
-            }
-        }
-        return possibleMoves;
+        int [][] offsets = {{2, 1}, {2, -1}, {1, -2}, {-1, 2}, {-2, -1}, {-2, 1}, {-1, 2}, {-1, -2}};
+        return generateStepMoves(offsets);
     }
 
     private Collection<ChessMove> PawnMovesCalculator() {
@@ -66,13 +55,18 @@ public class PieceMovesCalculator {
     }
 
     private Collection<ChessMove> BishopMovesCalculator() {
-        List<ChessMove> possibleMoves = new ArrayList<>();
-        return possibleMoves;
+        int[][] directions = {{1, 1}, {-1, -1}, {-1, 1}, {1, -1}};
+        return generateSlidingMoves(directions);
     }
 
     private Collection<ChessMove> RookMovesCalculator() {
-        List<ChessMove> possibleMoves = new ArrayList<>();
         int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        return generateSlidingMoves(directions);
+    }
+
+    private Collection<ChessMove> generateSlidingMoves(int[][] directions) {
+        List<ChessMove> possibleMoves = new ArrayList<>();
+
         for (int[] direction : directions){
             int x = direction[0];
             int y = direction[1];
@@ -95,4 +89,23 @@ public class PieceMovesCalculator {
         }
         return possibleMoves;
     }
+
+    private Collection<ChessMove> generateStepMoves(int[][] offsets) {
+        List<ChessMove> possibleMoves = new ArrayList<>();
+
+        for (int[] offset : offsets){
+            int x = offset[0];
+            int y = offset[1];
+
+            if (isInBounds(my_x + x, my_y + y)) {
+                ChessPosition targetPosition = new ChessPosition(my_x + x, my_y + y);
+                ChessPiece targetPiece = board.getPiece(targetPosition);
+                if ((targetPiece == null) || (targetPiece.getTeamColor() != piece.getTeamColor())) {
+                    possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+                }
+            }
+        }
+        return possibleMoves;
+    }
 }
+
