@@ -14,8 +14,8 @@ public class PieceMovesCalculator {
         this.board = board;
         this.myPosition = myPosition;
         this.piece = board.getPiece(myPosition);
-        this.my_x = myPosition.getRow();
-        this.my_y = myPosition.getColumn();
+        this.my_x = myPosition.getColumn();
+        this.my_y = myPosition.getRow();
     }
 
     public Collection<ChessMove> calculateMoves() {
@@ -28,10 +28,8 @@ public class PieceMovesCalculator {
         return null;
     }
 
-    //I need to return a LIST of ChessMove objects, each object takes ChessMove Takes start position, end position, and promotionPiece as a parameter
-    // For example return List.of(new ChessMove(new ChessPosition(5,4), new ChessPosition(1, 8), null
     private boolean isInBounds (int x, int y) {
-        return (x >= 0 && x < 8) && (y >= 0 && y < 8);
+        return (x > 0 && x <= 8) && (y > 0 && y <= 8);
     }
 
     private Collection<ChessMove> KingMovesCalculator() {
@@ -45,13 +43,60 @@ public class PieceMovesCalculator {
     }
 
     private Collection<ChessMove> KnightMovesCalculator() {
-        int [][] offsets = {{2, 1}, {2, -1}, {1, -2}, {-1, 2}, {-2, -1}, {-2, 1}, {-1, 2}, {-1, -2}};
+        int [][] offsets = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
         return generateStepMoves(offsets);
     }
 
     private Collection<ChessMove> PawnMovesCalculator() {
         List<ChessMove> possibleMoves = new ArrayList<>();
-        return possibleMoves;
+        int [] whitePawnMoves = {1, 2, 2, 8}; //First Number is regular move, second number is double move, third is starting y, fourth is ending y
+        int [] blackPawnMoves = {-1, -2, 7, 1};
+        int [] direction = piece.getTeamColor() == ChessGame.TeamColor.WHITE ? whitePawnMoves : blackPawnMoves;
+
+        //Move Forward
+        ChessPosition targetPosition = new ChessPosition(my_y + direction[0], my_x);
+        ChessPiece targetPiece = board.getPiece(targetPosition);
+        if (targetPiece == null) possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+
+        //Move Forward Twice
+        if (my_y == direction[2] && targetPiece == null) {
+            targetPosition = new ChessPosition(my_y + direction[1], my_x);
+            targetPiece = board.getPiece(targetPosition);
+            if (targetPiece == null) possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+        }
+
+        //Kill Diagonal
+        if (my_x != 8) { //right
+            targetPosition = new ChessPosition(my_y + direction[0], my_x + 1);
+            targetPiece = board.getPiece(targetPosition);
+            if (targetPiece != null && targetPiece.getTeamColor() != piece.getTeamColor()) { //I can move up one space
+                possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+            }
+        }
+        if (my_x != 1) { //left
+            targetPosition = new ChessPosition(my_y + direction[0],my_x - 1);
+            targetPiece = board.getPiece(targetPosition);
+            if (targetPiece != null && targetPiece.getTeamColor() != piece.getTeamColor()) { //I can move up one space
+                possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+            }
+        }
+
+        //If I can promote
+        List<ChessMove> finalizedPossibleMoves = new ArrayList<>();
+        for (ChessMove move : possibleMoves) {
+            if (move.getEndPosition().getRow() == direction[3]) {
+                ChessPosition startPosition = move.getStartPosition();
+                ChessPosition endPosition = move.getEndPosition();
+                finalizedPossibleMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.QUEEN));
+                finalizedPossibleMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.BISHOP));
+                finalizedPossibleMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.KNIGHT));
+                finalizedPossibleMoves.add(new ChessMove(startPosition, endPosition, ChessPiece.PieceType.ROOK));
+            } else {
+                finalizedPossibleMoves.add(move);
+            }
+        }
+
+        return finalizedPossibleMoves;
     }
 
     private Collection<ChessMove> BishopMovesCalculator() {
@@ -68,17 +113,17 @@ public class PieceMovesCalculator {
         List<ChessMove> possibleMoves = new ArrayList<>();
 
         for (int[] direction : directions){
-            int x = direction[0];
-            int y = direction[1];
+            int y = direction[0];
+            int x = direction[1];
 
-            while (isInBounds(my_x + x, my_y + y)) {
-                ChessPosition targetPosition = new ChessPosition(my_x + x, my_y + y);
+            while (isInBounds(my_y + y, my_x + x)) {
+                ChessPosition targetPosition = new ChessPosition(my_y + y, my_x + x);
                 ChessPiece targetPiece = board.getPiece(targetPosition);
 
                 if (targetPiece == null) {
                     possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
-                    if (x != 0) x = x < 0 ? x - 1 : x + 1;
                     if (y != 0) y = y < 0 ? y - 1 : y + 1;
+                    if (x != 0) x = x < 0 ? x - 1 : x + 1;
                 } else {
                     if (targetPiece.getTeamColor() != piece.getTeamColor()) {
                         possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
@@ -94,11 +139,11 @@ public class PieceMovesCalculator {
         List<ChessMove> possibleMoves = new ArrayList<>();
 
         for (int[] offset : offsets){
-            int x = offset[0];
-            int y = offset[1];
+            int y = offset[0];
+            int x = offset[1];
 
-            if (isInBounds(my_x + x, my_y + y)) {
-                ChessPosition targetPosition = new ChessPosition(my_x + x, my_y + y);
+            if (isInBounds(my_y + y, my_x + x)) {
+                ChessPosition targetPosition = new ChessPosition(my_y + y, my_x + x);
                 ChessPiece targetPiece = board.getPiece(targetPosition);
                 if ((targetPiece == null) || (targetPiece.getTeamColor() != piece.getTeamColor())) {
                     possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
@@ -108,4 +153,3 @@ public class PieceMovesCalculator {
         return possibleMoves;
     }
 }
-
