@@ -109,4 +109,31 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder boardString = new StringBuilder("   1 2 3 4 5 6 7 8\n");
+        for (int row = 8; row >= 1; row--) {
+            boardString.append(row).append("|");
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                boardString.append(piece == null ? " " : getPieceChar(piece));
+                boardString.append("|");
+            }
+            boardString.append("\n");
+        }
+        boardString.setLength(boardString.length() - 1); //get rid of extra "|"
+        return boardString.toString();
+    }
+
+    private char getPieceChar(ChessPiece piece) {
+        char pieceChar = '?';
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) pieceChar = 'k';
+        else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) pieceChar = 'q';
+        else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) pieceChar = 'r';
+        else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) pieceChar = 'n';
+        else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) pieceChar = 'b';
+        else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) pieceChar = 'p';
+        return piece.getTeamColor() == TeamColor.WHITE ? Character.toUpperCase(pieceChar) : pieceChar;
+    }
 }
