@@ -52,9 +52,15 @@ public class ChessGame {
         ChessPiece piece = board.getPiece(startPosition);
         if (piece == null) return null; //no piece there
         if (piece.getTeamColor() != currentTeamTurn) return List.of(); //not my turn, so return empty list
-        //if your in check, the only valid moves is the moves that get you out of check (move king, capture piece that is threatening you, block the check)
-
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> piecePossibleMoves = new PieceMovesCalculator(board, startPosition).calculateMoves();
+        for (ChessMove move : piecePossibleMoves) {
+            ChessGame copyOfChessGame = new ChessGame();
+            copyOfChessGame.board = this.board.clone();
+            copyOfChessGame.board.addPiece(move.getEndPosition(), copyOfChessGame.board.getPiece(move.getStartPosition()));
+            copyOfChessGame.board.board[move.getStartPosition().getRow()][move.getStartPosition().getColumn()] = null;
+            if (copyOfChessGame.isInCheck(copyOfChessGame.currentTeamTurn)) piecePossibleMoves.remove(move);
+        }
+        return piecePossibleMoves;
     }
 
     /**

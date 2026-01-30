@@ -76,4 +76,16 @@ public class ChessBoard {
     public int hashCode() {
         return Arrays.deepHashCode(board);
     }
+
+    @Override
+    public ChessBoard clone() {
+        ChessBoard copy = new ChessBoard();
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                ChessPiece piece = this.board[row][col];
+                if (piece != null) copy.board[row][col] = new ChessPiece(piece.getTeamColor(), piece.getPieceType());
+            }
+        }
+        return copy;
+    }
 }
