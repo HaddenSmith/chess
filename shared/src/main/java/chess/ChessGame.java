@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -50,17 +51,18 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null) return null; //no piece there
-        if (piece.getTeamColor() != currentTeamTurn) return List.of(); //not my turn, so return empty list
+        if (piece == null) return List.of(); //no piece there
         Collection<ChessMove> piecePossibleMoves = new PieceMovesCalculator(board, startPosition).calculateMoves();
+        List<ChessMove> legalMoves = new ArrayList<>();
         for (ChessMove move : piecePossibleMoves) {
             ChessGame copyOfChessGame = new ChessGame();
-            copyOfChessGame.board = this.board.clone();
+            copyOfChessGame.setBoard(this.board.clone());
+            copyOfChessGame.setTeamTurn(piece.getTeamColor());
             copyOfChessGame.board.addPiece(move.getEndPosition(), copyOfChessGame.board.getPiece(move.getStartPosition()));
-            copyOfChessGame.board.board[move.getStartPosition().getRow()][move.getStartPosition().getColumn()] = null;
-            if (copyOfChessGame.isInCheck(copyOfChessGame.currentTeamTurn)) piecePossibleMoves.remove(move);
+            copyOfChessGame.board.removePiece(move.getStartPosition());
+            if (!copyOfChessGame.isInCheck(copyOfChessGame.currentTeamTurn)) legalMoves.add(move);
         }
-        return piecePossibleMoves;
+        return legalMoves;
     }
 
     /**
@@ -120,7 +122,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        board.resetBoard();
+        this.board = board;
     }
 
     /**
