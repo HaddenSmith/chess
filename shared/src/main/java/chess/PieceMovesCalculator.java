@@ -155,4 +155,20 @@ public class PieceMovesCalculator {
         }
         return possibleMoves;
     }
+
+    public boolean calculateIsInCheck() {
+        Collection<ChessMove> vision = calculateQueenMoves();
+        vision.addAll(calculateKnightMoves());
+
+        for (ChessMove move : vision) {
+            ChessPiece targetPiece = board.getPiece(move.getEndPosition());
+            if (targetPiece != null && targetPiece.getTeamColor() != myPiece.getTeamColor()) {
+                 PieceMovesCalculator calculator = new PieceMovesCalculator(board, move.getEndPosition());
+                 for (ChessMove possible_move : calculator.calculateMoves()) {
+                     if (possible_move.getEndPosition().equals(myPosition)) return true;
+                 }
+            }
+        }
+        return false;
+    }
 }

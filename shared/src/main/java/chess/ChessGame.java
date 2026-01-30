@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -48,6 +49,11 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        ChessPiece piece = board.getPiece(startPosition);
+        if (piece == null) return null; //no piece there
+        if (piece.getTeamColor() != currentTeamTurn) return List.of(); //not my turn, so return empty list
+        //if your in check, the only valid moves is the moves that get you out of check (move king, capture piece that is threatening you, block the check)
+
         throw new RuntimeException("Not implemented");
     }
 
@@ -58,7 +64,7 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        throw new RuntimeException("Not implemented"); //if move is contained in the list i get from valid moves, then move, else throw exeption
     }
 
     /**
@@ -68,7 +74,17 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        for (int row = 8; row >= 1; row--) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition targetPosition = new ChessPosition(row, col);
+                ChessPiece targetPiece = board.getPiece(targetPosition);
+                if (targetPiece != null && targetPiece.getTeamColor() == teamColor && targetPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                    PieceMovesCalculator calculator = new PieceMovesCalculator(board, targetPosition);
+                    return calculator.calculateIsInCheck();
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -78,7 +94,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        throw new RuntimeException("Not implemented"); //if your turn, and no valid moves, and in check, then checkmate
     }
 
     /**
