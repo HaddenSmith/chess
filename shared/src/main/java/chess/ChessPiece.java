@@ -12,6 +12,7 @@ import java.util.Objects;
 public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
+    //private boolean hasMoved = false; //Maybe use for EnPassant/ Castling
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
