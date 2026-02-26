@@ -35,10 +35,10 @@ public class Server {
     private void registerEndpoints() {
         clearEndPoint();
         registerEndPoint();
-
+        loginEndPoint();
     }
 
-    public void clearEndPoint() {
+    private void clearEndPoint() {
         Gson gson = new Gson();
 
         javalin.delete("/db", ctx -> {
@@ -55,14 +55,33 @@ public class Server {
         });
     }
 
-    public void registerEndPoint() {
+    private void registerEndPoint() {
         Gson gson = new Gson();
 
         javalin.post("/user", ctx -> {
             try {
                 RegisterRequest userInfo = gson.fromJson(ctx.body(), RegisterRequest.class);
                 AuthData authData = userService.register(userInfo.username(), userInfo.password(), userInfo.email());
-                RegisterResult result = new RegisterResult(authData.username(), authData.authToken());
+                UserResult result = new UserResult(authData.username(), authData.authToken());
+                ctx.result(gson.toJson(result));
+                ctx.status(200);
+            } catch (DataAccessException e) {
+                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+                if (e.getMessage().equals("User Already Exists")) ctx.status(403);
+                //if (e.getMessage().equals("")) ctx.status(400);
+                //if (e.getMessage().equals("")) ctx.status(500);
+            }
+        });
+    }
+
+    private void loginEndPoint() {
+        Gson gson = new Gson();
+
+        javalin.post("/session", ctx -> {
+            try {
+                LoginRequest userInfo = gson.fromJson(ctx.body(), LoginRequest.class);
+                AuthData authData = userService.login(userInfo.username(), userInfo.password());
+                UserResult result = new UserResult(authData.username(), authData.authToken());
                 ctx.result(gson.toJson(result));
                 ctx.status(200);
             } catch (DataAccessException e) {
