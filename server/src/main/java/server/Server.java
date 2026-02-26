@@ -36,6 +36,7 @@ public class Server {
         clearEndPoint();
         registerEndPoint();
         loginEndPoint();
+        logoutEndPoint();
     }
 
     private void clearEndPoint() {
@@ -90,6 +91,24 @@ public class Server {
                 //if (e.getMessage().equals("")) ctx.status(400);
                 //if (e.getMessage().equals("")) ctx.status(500);
             }
+        });
+    }
+
+    private void logoutEndPoint() {
+        Gson gson = new Gson();
+
+        javalin.delete("/session", ctx -> {
+           try {
+               String authToken = ctx.header("authorization");
+               userService.logout(authToken);
+               ctx.result(gson.toJson(new Object())); //Returns {}
+               ctx.status(200);
+           } catch (DataAccessException e) {
+               ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+               if (e.getMessage().equals("User Already Exists")) ctx.status(403);
+               //if (e.getMessage().equals("")) ctx.status(400);
+               //if (e.getMessage().equals("")) ctx.status(500);
+           }
         });
     }
 
