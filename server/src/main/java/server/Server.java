@@ -47,7 +47,7 @@ public class Server {
                 clearService.clear();
                 ctx.status(200);
 
-                ctx.result(gson.toJson(new Object())); // returns {}
+                ctx.result("{}");
             } catch (DataAccessException e) {
                 ctx.status(500);
 
@@ -64,13 +64,16 @@ public class Server {
                 RegisterRequest userInfo = gson.fromJson(ctx.body(), RegisterRequest.class);
                 AuthData authData = userService.register(userInfo.username(), userInfo.password(), userInfo.email());
                 UserResult result = new UserResult(authData.username(), authData.authToken());
-                ctx.result(gson.toJson(result));
                 ctx.status(200);
+                ctx.result(gson.toJson(result));
             } catch (DataAccessException e) {
+                ctx.status(500);
+                if (e.getMessage().equals("Error: bad request")) ctx.status(400);
+                else if (e.getMessage().equals("Error: already taken")) ctx.status(403);
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+            } catch (Exception e) {
+                ctx.status(500);
                 ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
-                if (e.getMessage().equals("User Already Exists")) ctx.status(403);
-                //if (e.getMessage().equals("")) ctx.status(400);
-                //if (e.getMessage().equals("")) ctx.status(500);
             }
         });
     }
@@ -83,13 +86,16 @@ public class Server {
                 LoginRequest userInfo = gson.fromJson(ctx.body(), LoginRequest.class);
                 AuthData authData = userService.login(userInfo.username(), userInfo.password());
                 UserResult result = new UserResult(authData.username(), authData.authToken());
-                ctx.result(gson.toJson(result));
                 ctx.status(200);
+                ctx.result(gson.toJson(result));
             } catch (DataAccessException e) {
+                ctx.status(500);
+                if (e.getMessage().equals("Error: bad request")) ctx.status(400);
+                else if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+            } catch (Exception e) {
+                ctx.status(500);
                 ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
-                if (e.getMessage().equals("User Already Exists")) ctx.status(403);
-                //if (e.getMessage().equals("")) ctx.status(400);
-                //if (e.getMessage().equals("")) ctx.status(500);
             }
         });
     }
@@ -101,13 +107,15 @@ public class Server {
            try {
                String authToken = ctx.header("authorization");
                userService.logout(authToken);
-               ctx.result(gson.toJson(new Object())); //Returns {}
                ctx.status(200);
+               ctx.result("{}");
            } catch (DataAccessException e) {
+               ctx.status(500);
+               ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+               if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
+           } catch (Exception e) {
+               ctx.status(500);
                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
-               if (e.getMessage().equals("User Already Exists")) ctx.status(403);
-               //if (e.getMessage().equals("")) ctx.status(400);
-               //if (e.getMessage().equals("")) ctx.status(500);
            }
         });
     }

@@ -18,23 +18,26 @@ public class UserService {
     }
 
     public AuthData register(String username, String password, String email) throws DataAccessException {
+        if (username.isEmpty() || password.isEmpty() || email.isEmpty()) throw new DataAccessException("Error: bad request");
         if (userDAO.getUser(username) == null) {
             userDAO.createUser(new UserData(username, password, email));
             return login(username, password);
-        } else throw new DataAccessException("User Already Exists");
+        } else throw new DataAccessException("Error: already taken");
     }
 
     public AuthData login(String username, String password) throws DataAccessException {
+        if (username.isEmpty() || password.isEmpty()) throw new DataAccessException("Error: bad request");
         UserData user = userDAO.getUser(username);
         if (user != null && (user.username().equals(username) && user.password().equals(password))) {
             String authToken = UUID.randomUUID().toString();
             AuthData userAuthData = new AuthData(authToken, username);
             authDAO.createAuth(userAuthData);
             return userAuthData;
-        } else throw new DataAccessException("Invalid Login Credentials");
+        } else throw new DataAccessException("Error: unauthorized");
     }
 
     public void logout(String authToken) throws DataAccessException {
+        if (authToken.isEmpty()) throw new DataAccessException("Error: unauthorized");
         authDAO.deleteAuth(authToken);
     }
 }
