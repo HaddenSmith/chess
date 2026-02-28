@@ -56,7 +56,7 @@ public class GameService {
     }
 
     private void validateAuth(String authToken) throws DataAccessException {
-        if (authDAO.getAuth(authToken) == null) throw new DataAccessException("Invalid AuthToken");
+        if (authDAO.getAuth(authToken) == null) throw new DataAccessException("Error: unauthorized");
     }
 }
 

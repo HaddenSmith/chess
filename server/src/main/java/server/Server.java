@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import io.javalin.Javalin;
 import dataaccess.*;
 import model.AuthData;
+import model.GameData;
 import service.*;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class Server {
@@ -37,6 +39,7 @@ public class Server {
         registerEndPoint();
         loginEndPoint();
         logoutEndPoint();
+        listGamesEndPoint();
     }
 
     private void clearEndPoint() {
@@ -106,6 +109,7 @@ public class Server {
         javalin.delete("/session", ctx -> {
            try {
                String authToken = ctx.header("authorization");
+               if (authToken == null) authToken = "";
                userService.logout(authToken);
                ctx.status(200);
                ctx.result("{}");
@@ -117,6 +121,25 @@ public class Server {
                ctx.status(500);
                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
            }
+        });
+    }
+
+    private void listGamesEndPoint() {
+        Gson gson = new Gson();
+
+        javalin.get("/game", ctx -> {
+            try {
+                String authToken = ctx.header("authorization");
+                Collection<GameData> games = gameService.listGames(authToken);
+                ctx.status(200);
+            } catch (DataAccessException e) {
+                ctx.status(500);
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+                if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
+            } catch (Exception e) {
+                ctx.status(500);
+                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+            }
         });
     }
 
