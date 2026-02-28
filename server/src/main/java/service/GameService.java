@@ -33,24 +33,25 @@ public class GameService {
     }
 
     public void joinGame(String authToken, int gameID, String color) throws DataAccessException {
-        validateAuth(authToken);
         GameData currentGame = gameDAO.getGame(gameID);
-        if (currentGame == null) throw new DataAccessException("Invalid GameID");
 
-        //Handles color setting
-        if (!color.equalsIgnoreCase("white") && !color.equalsIgnoreCase("black")) {
-            throw new DataAccessException("Invalid Color");
+        if (!color.equalsIgnoreCase("white") && !color.equalsIgnoreCase("black")
+            || authToken.isEmpty() || currentGame == null) {
+            throw new DataAccessException("Error: bad request");
         }
+
+        validateAuth(authToken);
+
         String whiteUsername = currentGame.whiteUsername();
         String blackUsername = currentGame.blackUsername();
         if (color.equalsIgnoreCase("white")) {
             if (whiteUsername == null) whiteUsername = authDAO.getAuth(authToken).username();
-            else throw new DataAccessException("Color Already Taken");
+            else throw new DataAccessException("Error: already taken");
         } else {
             if (color.equalsIgnoreCase("black")) {
                 if (blackUsername == null) blackUsername = authDAO.getAuth(authToken).username();
-                else throw new DataAccessException("Color Already Taken");
-            } else throw new DataAccessException("Invalid Color");
+                else throw new DataAccessException("Error: already taken");
+            }
         }
 
         gameDAO.updateGame(new GameData(gameID, whiteUsername, blackUsername, currentGame.gameName(), currentGame.game()));

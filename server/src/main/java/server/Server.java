@@ -7,6 +7,7 @@ import model.AuthData;
 import model.GameData;
 import service.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -28,19 +29,13 @@ public class Server {
         gameService = new GameService(gameDAO, authDAO);
         clearService = new ClearService(gameDAO, authDAO, userDAO);
 
-        registerEndpoints();
-
-        // Register your endpoints and exception handlers here.
-
-    }
-
-    private void registerEndpoints() {
         clearEndPoint();
         registerEndPoint();
         loginEndPoint();
         logoutEndPoint();
         listGamesEndPoint();
         createGameEndPoint();
+        joinGameEndPoint();
     }
 
     private void clearEndPoint() {
@@ -133,7 +128,13 @@ public class Server {
                 String authToken = ctx.header("authorization");
                 if (authToken == null) authToken = "";
                 Collection<GameData> games = gameService.listGames(authToken);
+                Collection<GameSummary> gameSummaries = new ArrayList<>();
+                for (GameData data : games) {
+                    gameSummaries.add(new GameSummary(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName()));
+                }
+                ListGamesResult result = new ListGamesResult(gameSummaries);
                 ctx.status(200);
+                ctx.result(gson.toJson(result));
             } catch (DataAccessException e) {
                 ctx.status(500);
                 ctx.result(gson.toJson(Map.of("message", e.getMessage())));
@@ -162,6 +163,30 @@ public class Server {
                 ctx.result(gson.toJson(Map.of("message", e.getMessage())));
                 if (e.getMessage().equals("Error: bad request")) ctx.status(400);
                 if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
+            } catch (Exception e) {
+                ctx.status(500);
+                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+            }
+        });
+    }
+
+    private void joinGameEndPoint() {
+        Gson gson = new Gson();
+
+        javalin.put("/game", ctx -> {
+            try {
+                String authToken = ctx.header("authorization");
+                if (authToken == null) authToken = "";
+                JoinGameRequest joinRequest = gson.fromJson(ctx.body(), JoinGameRequest.class);
+                gameService.joinGame(authToken, joinRequest.gameID(), joinRequest.playerColor());
+                ctx.status(200);
+                ctx.result("{}");
+            } catch (DataAccessException e) {
+                ctx.status(500);
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+                if (e.getMessage().equals("Error: bad request")) ctx.status(400);
+                if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
+                if (e.getMessage().equals("Error: already taken")) ctx.status(403);
             } catch (Exception e) {
                 ctx.status(500);
                 ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
