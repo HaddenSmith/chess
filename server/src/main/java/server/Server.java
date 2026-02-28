@@ -40,6 +40,7 @@ public class Server {
         loginEndPoint();
         logoutEndPoint();
         listGamesEndPoint();
+        createGameEndPoint();
     }
 
     private void clearEndPoint() {
@@ -130,11 +131,36 @@ public class Server {
         javalin.get("/game", ctx -> {
             try {
                 String authToken = ctx.header("authorization");
+                if (authToken == null) authToken = "";
                 Collection<GameData> games = gameService.listGames(authToken);
                 ctx.status(200);
             } catch (DataAccessException e) {
                 ctx.status(500);
                 ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+                if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
+            } catch (Exception e) {
+                ctx.status(500);
+                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+            }
+        });
+    }
+
+    private void createGameEndPoint() {
+        Gson gson = new Gson();
+
+        javalin.post("/game", ctx -> {
+            try {
+                String authToken = ctx.header("authorization");
+                if (authToken == null) authToken = "";
+                String gameName = gson.fromJson(ctx.body(), CreateGameRequest.class).gameName();
+                GameData gameData = gameService.createGame(authToken, gameName);
+                CreateGameResult result = new CreateGameResult(gameData.gameID());
+                ctx.status(200);
+                ctx.result(gson.toJson(result));
+            } catch (DataAccessException e) {
+                ctx.status(500);
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
+                if (e.getMessage().equals("Error: bad request")) ctx.status(400);
                 if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
             } catch (Exception e) {
                 ctx.status(500);

@@ -19,6 +19,7 @@ public class GameService {
     }
 
     public GameData createGame(String authToken, String gameName) throws DataAccessException {
+        if (authToken.isEmpty() || gameName.isEmpty()) throw new DataAccessException("Error: bad request");
         validateAuth(authToken);
         int gameID = nextGameID++;
         GameData game = new GameData(gameID, null, null, gameName, new ChessGame());
