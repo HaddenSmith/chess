@@ -49,7 +49,6 @@ public class Server {
                 ctx.result("{}");
             } catch (DataAccessException e) {
                 ctx.status(500);
-
                 ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
             }
         });
@@ -65,14 +64,9 @@ public class Server {
                 UserResult result = new UserResult(authData.username(), authData.authToken());
                 ctx.status(200);
                 ctx.result(gson.toJson(result));
-            } catch (DataAccessException e) {
-                ctx.status(500);
-                if (e.getMessage().equals("Error: bad request")) ctx.status(400);
-                else if (e.getMessage().equals("Error: already taken")) ctx.status(403);
-                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
             } catch (Exception e) {
-                ctx.status(500);
-                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+                ctx.status(getErrorStatusCode(e.getMessage()));
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
             }
         });
     }
@@ -87,14 +81,9 @@ public class Server {
                 UserResult result = new UserResult(authData.username(), authData.authToken());
                 ctx.status(200);
                 ctx.result(gson.toJson(result));
-            } catch (DataAccessException e) {
-                ctx.status(500);
-                if (e.getMessage().equals("Error: bad request")) ctx.status(400);
-                else if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
-                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
             } catch (Exception e) {
-                ctx.status(500);
-                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+                ctx.status(getErrorStatusCode(e.getMessage()));
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
             }
         });
     }
@@ -109,13 +98,9 @@ public class Server {
                userService.logout(authToken);
                ctx.status(200);
                ctx.result("{}");
-           } catch (DataAccessException e) {
-               ctx.status(500);
-               ctx.result(gson.toJson(Map.of("message", e.getMessage())));
-               if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
            } catch (Exception e) {
-               ctx.status(500);
-               ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+               ctx.status(getErrorStatusCode(e.getMessage()));
+               ctx.result(gson.toJson(Map.of("message", e.getMessage())));
            }
         });
     }
@@ -135,13 +120,9 @@ public class Server {
                 ListGamesResult result = new ListGamesResult(gameSummaries);
                 ctx.status(200);
                 ctx.result(gson.toJson(result));
-            } catch (DataAccessException e) {
-                ctx.status(500);
-                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
-                if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
             } catch (Exception e) {
-                ctx.status(500);
-                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+                ctx.status(getErrorStatusCode(e.getMessage()));
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
             }
         });
     }
@@ -158,14 +139,9 @@ public class Server {
                 CreateGameResult result = new CreateGameResult(gameData.gameID());
                 ctx.status(200);
                 ctx.result(gson.toJson(result));
-            } catch (DataAccessException e) {
-                ctx.status(500);
-                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
-                if (e.getMessage().equals("Error: bad request")) ctx.status(400);
-                if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
             } catch (Exception e) {
-                ctx.status(500);
-                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+                ctx.status(getErrorStatusCode(e.getMessage()));
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
             }
         });
     }
@@ -181,17 +157,20 @@ public class Server {
                 gameService.joinGame(authToken, joinRequest.gameID(), joinRequest.playerColor());
                 ctx.status(200);
                 ctx.result("{}");
-            } catch (DataAccessException e) {
-                ctx.status(500);
-                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
-                if (e.getMessage().equals("Error: bad request")) ctx.status(400);
-                if (e.getMessage().equals("Error: unauthorized")) ctx.status(401);
-                if (e.getMessage().equals("Error: already taken")) ctx.status(403);
             } catch (Exception e) {
-                ctx.status(500);
-                ctx.result(gson.toJson(Map.of("message", "Error: " + e.getMessage())));
+                ctx.status(getErrorStatusCode(e.getMessage()));
+                ctx.result(gson.toJson(Map.of("message", e.getMessage())));
             }
         });
+    }
+
+    private int getErrorStatusCode(String errorMessage) {
+        int statusCode = 500;
+        if (errorMessage.equals("Error: bad request")) statusCode = 400;
+        if (errorMessage.equals("Error: unauthorized")) statusCode = 401;
+        if (errorMessage.equals("Error: already taken")) statusCode = 403;
+
+        return statusCode;
     }
 
     public int run(int desiredPort) {
