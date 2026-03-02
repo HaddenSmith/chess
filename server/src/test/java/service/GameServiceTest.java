@@ -19,7 +19,7 @@ public class GameServiceTest {
     private GameDAO gameDAO;
 
     @BeforeEach
-    void setUp() {
+    void setUp() { //Just initializes everything I need for the tests
         userDAO = new MemoryUserDAO();
         authDAO = new MemoryAuthDAO();
         gameDAO = new MemoryGameDAO();
