@@ -19,7 +19,7 @@ public class GameService {
     }
 
     public GameData createGame(String authToken, String gameName) throws DataAccessException {
-        if (authToken.isEmpty() || gameName.isEmpty()) throw new DataAccessException("Error: bad request");
+        if (gameName == null || gameName.isEmpty()) throw new DataAccessException("Error: bad request");
         validateAuth(authToken);
         int gameID = nextGameID++;
         GameData game = new GameData(gameID, null, null, gameName, new ChessGame());
@@ -33,14 +33,13 @@ public class GameService {
     }
 
     public void joinGame(String authToken, int gameID, String color) throws DataAccessException {
-        GameData currentGame = gameDAO.getGame(gameID);
+        validateAuth(authToken);
 
-        if (!color.equalsIgnoreCase("white") && !color.equalsIgnoreCase("black")
-            || authToken.isEmpty() || currentGame == null) {
+        GameData currentGame = gameDAO.getGame(gameID);
+        if (currentGame == null || color == null
+           || !color.equalsIgnoreCase("white") && !color.equalsIgnoreCase("black")) {
             throw new DataAccessException("Error: bad request");
         }
-
-        validateAuth(authToken);
 
         String whiteUsername = currentGame.whiteUsername();
         String blackUsername = currentGame.blackUsername();
