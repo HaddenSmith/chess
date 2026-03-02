@@ -94,7 +94,6 @@ public class Server {
         javalin.delete("/session", ctx -> {
            try {
                String authToken = ctx.header("authorization");
-               if (authToken == null) authToken = "";
                userService.logout(authToken);
                ctx.status(200);
                ctx.result("{}");
@@ -111,7 +110,6 @@ public class Server {
         javalin.get("/game", ctx -> {
             try {
                 String authToken = ctx.header("authorization");
-                if (authToken == null) authToken = "";
                 Collection<GameData> games = gameService.listGames(authToken);
                 Collection<GameSummary> gameSummaries = new ArrayList<>();
                 for (GameData data : games) {
@@ -133,7 +131,6 @@ public class Server {
         javalin.post("/game", ctx -> {
             try {
                 String authToken = ctx.header("authorization");
-                if (authToken == null) authToken = "";
                 String gameName = gson.fromJson(ctx.body(), CreateGameRequest.class).gameName();
                 GameData gameData = gameService.createGame(authToken, gameName);
                 CreateGameResult result = new CreateGameResult(gameData.gameID());
@@ -152,7 +149,6 @@ public class Server {
         javalin.put("/game", ctx -> {
             try {
                 String authToken = ctx.header("authorization");
-                if (authToken == null) authToken = "";
                 JoinGameRequest joinRequest = gson.fromJson(ctx.body(), JoinGameRequest.class);
                 gameService.joinGame(authToken, joinRequest.gameID(), joinRequest.playerColor());
                 ctx.status(200);
@@ -166,9 +162,9 @@ public class Server {
 
     private int getErrorStatusCode(String errorMessage) {
         int statusCode = 500;
-        if (errorMessage.equals("Error: bad request")) statusCode = 400;
-        if (errorMessage.equals("Error: unauthorized")) statusCode = 401;
-        if (errorMessage.equals("Error: already taken")) statusCode = 403;
+        if (errorMessage.equals("Error: bad request")) { statusCode = 400; }
+        if (errorMessage.equals("Error: unauthorized")) { statusCode = 401; }
+        if (errorMessage.equals("Error: already taken")) { statusCode = 403; }
 
         return statusCode;
     }

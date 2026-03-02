@@ -25,7 +25,9 @@ public class UserService {
         if (userDAO.getUser(username) == null) {
             userDAO.createUser(new UserData(username, password, email));
             return login(username, password);
-        } else throw new DataAccessException("Error: already taken");
+        } else {
+            throw new DataAccessException("Error: already taken");
+        }
     }
 
     public AuthData login(String username, String password) throws DataAccessException {
@@ -39,12 +41,15 @@ public class UserService {
             AuthData userAuthData = new AuthData(authToken, username);
             authDAO.createAuth(userAuthData);
             return userAuthData;
-        } else throw new DataAccessException("Error: unauthorized");
+        } else {
+            throw new DataAccessException("Error: unauthorized");
+        }
     }
 
     public void logout(String authToken) throws DataAccessException {
-        if (authToken.isEmpty()) throw new DataAccessException("Error: unauthorized");
-        if (authDAO.getAuth(authToken) == null) throw new DataAccessException("Error: unauthorized");
+        if (authDAO.getAuth(authToken) == null || authToken.isEmpty()) {
+            throw new DataAccessException("Error: unauthorized");
+        }
         authDAO.deleteAuth(authToken);
     }
 }

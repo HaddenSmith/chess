@@ -20,12 +20,12 @@ public class PieceMovesCalculator {
     }
 
     public Collection<ChessMove> calculateMoves() {
-        if (myPiece.getPieceType() == ChessPiece.PieceType.KING) return calculateKingMoves();
-        if (myPiece.getPieceType() == ChessPiece.PieceType.QUEEN) return calculateQueenMoves();
-        if (myPiece.getPieceType() == ChessPiece.PieceType.ROOK) return calculateRookMoves();
-        if (myPiece.getPieceType() == ChessPiece.PieceType.KNIGHT) return calculateKnightMoves();
-        if (myPiece.getPieceType() == ChessPiece.PieceType.BISHOP) return calculateBishopMoves();
-        if (myPiece.getPieceType() == ChessPiece.PieceType.PAWN) return calculatePawnMoves();
+        if (myPiece.getPieceType() == ChessPiece.PieceType.KING) { return calculateKingMoves(); }
+        if (myPiece.getPieceType() == ChessPiece.PieceType.QUEEN) { return calculateQueenMoves(); }
+        if (myPiece.getPieceType() == ChessPiece.PieceType.ROOK) { return calculateRookMoves(); }
+        if (myPiece.getPieceType() == ChessPiece.PieceType.KNIGHT) { return calculateKnightMoves(); }
+        if (myPiece.getPieceType() == ChessPiece.PieceType.BISHOP) { return calculateBishopMoves(); }
+        if (myPiece.getPieceType() == ChessPiece.PieceType.PAWN) { return calculatePawnMoves(); }
         return List.of(); //returns empty list
     }
 
@@ -69,13 +69,17 @@ public class PieceMovesCalculator {
         //Move Forward
         ChessPosition targetPosition = new ChessPosition(myRow + forward, myCol);
         ChessPiece targetPiece = board.getPiece(targetPosition);
-        if (targetPiece == null) possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+        if (targetPiece == null) {
+            possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+        }
 
         //Move Forward Twice
         if (myRow == startRow && targetPiece == null) {
             targetPosition = new ChessPosition(myRow + doubleForward, myCol);
             targetPiece = board.getPiece(targetPosition);
-            if (targetPiece == null) possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+            if (targetPiece == null) {
+                possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
+            }
         }
 
         //Capture Diagonal
@@ -125,8 +129,8 @@ public class PieceMovesCalculator {
 
                 if (targetPiece == null) {
                     possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
-                    if (y != 0) y = y < 0 ? y - 1 : y + 1;
-                    if (x != 0) x = x < 0 ? x - 1 : x + 1;
+                    if (y != 0) { y = y < 0 ? y - 1 : y + 1; }
+                    if (x != 0) { x = x < 0 ? x - 1 : x + 1; }
                 } else {
                     if (targetPiece.getTeamColor() != myPiece.getTeamColor()) {
                         possibleMoves.add(new ChessMove(myPosition, targetPosition, null));
@@ -164,8 +168,8 @@ public class PieceMovesCalculator {
             ChessPiece targetPiece = board.getPiece(move.getEndPosition());
             if (targetPiece != null && targetPiece.getTeamColor() != myPiece.getTeamColor()) {
                  PieceMovesCalculator calculator = new PieceMovesCalculator(board, move.getEndPosition());
-                 for (ChessMove possible_move : calculator.calculateMoves()) {
-                     if (possible_move.getEndPosition().equals(myPosition)) return true;
+                 for (ChessMove possibleMove : calculator.calculateMoves()) {
+                     if (possibleMove.getEndPosition().equals(myPosition)) { return true; }
                  }
             }
         }

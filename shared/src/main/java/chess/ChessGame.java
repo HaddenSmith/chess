@@ -52,7 +52,7 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null) return List.of(); //no piece there
+        if (piece == null) { return List.of(); } //no piece there
         Collection<ChessMove> piecePossibleMoves = new PieceMovesCalculator(board, startPosition).calculateMoves();
         List<ChessMove> legalMoves = new ArrayList<>();
         for (ChessMove move : piecePossibleMoves) {
@@ -61,7 +61,7 @@ public class ChessGame {
             copyOfChessGame.setTeamTurn(piece.getTeamColor());
             copyOfChessGame.board.addPiece(move.getEndPosition(), copyOfChessGame.board.getPiece(move.getStartPosition()));
             copyOfChessGame.board.removePiece(move.getStartPosition());
-            if (!copyOfChessGame.isInCheck(copyOfChessGame.currentTeamTurn)) legalMoves.add(move);
+            if (!copyOfChessGame.isInCheck(copyOfChessGame.currentTeamTurn)) { legalMoves.add(move); }
         }
         return legalMoves;
     }
@@ -76,11 +76,16 @@ public class ChessGame {
         Collection<ChessMove> legalMoves = validMoves(move.getStartPosition());
         ChessPiece targetPiece = board.getPiece(move.getStartPosition());
         if (legalMoves.contains(move) && currentTeamTurn == targetPiece.getTeamColor()) {
-            if (move.getPromotionPiece() == null) board.addPiece(move.getEndPosition(), targetPiece);
-            else board.addPiece(move.getEndPosition(), new ChessPiece(currentTeamTurn, move.getPromotionPiece()));
+            if (move.getPromotionPiece() == null) {
+                board.addPiece(move.getEndPosition(), targetPiece);
+            } else {
+                board.addPiece(move.getEndPosition(), new ChessPiece(currentTeamTurn, move.getPromotionPiece()));
+            }
             board.removePiece(move.getStartPosition());
             setTeamTurn(currentTeamTurn == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
-        } else throw new InvalidMoveException();
+        } else {
+            throw new InvalidMoveException();
+        }
     }
 
     /**
@@ -125,14 +130,14 @@ public class ChessGame {
     }
 
     private boolean anyValidMoves(TeamColor teamColor) {
-        if (currentTeamTurn != teamColor) return true;
+        if (currentTeamTurn != teamColor) { return true; }
         for (int row = 8; row >= 1; row--) {
             for (int col = 1; col <= 8; col++) {
                 ChessPosition targetPosition = new ChessPosition(row, col);
                 ChessPiece targetPiece = board.getPiece(targetPosition);
-                if (targetPiece == null) continue;
-                if (targetPiece.getTeamColor() != teamColor) continue;
-                if (!validMoves(targetPosition).isEmpty()) return true;
+                if (targetPiece == null) { continue; }
+                if (targetPiece.getTeamColor() != teamColor) { continue; }
+                if (!validMoves(targetPosition).isEmpty()) { return true; }
             }
         }
         return false;
@@ -174,12 +179,12 @@ public class ChessGame {
 
     private char getPieceChar(ChessPiece piece) {
         char pieceChar = '?';
-        if (piece.getPieceType() == ChessPiece.PieceType.KING) pieceChar = 'k';
-        else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) pieceChar = 'q';
-        else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) pieceChar = 'r';
-        else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) pieceChar = 'n';
-        else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) pieceChar = 'b';
-        else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) pieceChar = 'p';
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) { pieceChar = 'k'; }
+        else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) { pieceChar = 'q'; }
+        else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) { pieceChar = 'r'; }
+        else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) { pieceChar = 'n'; }
+        else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) { pieceChar = 'b'; }
+        else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) { pieceChar = 'p'; }
         return piece.getTeamColor() == TeamColor.WHITE ? Character.toUpperCase(pieceChar) : pieceChar;
     }
 

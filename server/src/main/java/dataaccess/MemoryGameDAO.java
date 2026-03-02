@@ -9,28 +9,23 @@ public class MemoryGameDAO implements GameDAO {
     private final HashMap<Integer, GameData> games = new HashMap<>();
 
     @Override
-    public void createGame(GameData game) throws DataAccessException {
+    public void createGame(GameData game) {
         games.put(game.gameID(), game);
     }
 
     @Override
-    public GameData getGame(int gameID) throws DataAccessException {
+    public GameData getGame(int gameID) {
         return games.get(gameID);
     }
 
     @Override
-    public Collection<GameData> listGames() throws DataAccessException {
+    public Collection<GameData> listGames() {
         return games.values();
     }
 
     @Override
-    public void updateGame(GameData newData) throws DataAccessException {
+    public void updateGame(GameData newData) {
         games.put(newData.gameID(), newData);
-    }
-
-    @Override
-    public void deleteGame(int gameID) throws DataAccessException {
-        games.remove(gameID);
     }
 
     @Override
