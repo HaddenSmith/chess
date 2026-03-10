@@ -54,8 +54,9 @@ public class GameService {
             }
         } else {
             if (color.equalsIgnoreCase("black")) {
-                if (blackUsername == null) { blackUsername = authDAO.getAuth(authToken).username(); }
-                else {
+                if (blackUsername == null) {
+                    blackUsername = authDAO.getAuth(authToken).username();
+                } else {
                     throw new DataAccessException("Error: already taken");
                 }
             }

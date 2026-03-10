@@ -161,7 +161,7 @@ public class Server {
     }
 
     private int getErrorStatusCode(String errorMessage) {
-        int statusCode = 500;
+        int statusCode = 500; //Defaults to a server error
         if (errorMessage.equals("Error: bad request")) { statusCode = 400; }
         if (errorMessage.equals("Error: unauthorized")) { statusCode = 401; }
         if (errorMessage.equals("Error: already taken")) { statusCode = 403; }
