@@ -5,6 +5,8 @@ import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.util.UUID;
 
 public class UserService {
@@ -36,7 +38,8 @@ public class UserService {
             throw new DataAccessException("Error: bad request");
         }
         UserData user = userDAO.getUser(username);
-        if (user != null && (user.username().equals(username) && user.password().equals(password))) {
+        //If not using BCrypt for the SQL, instead use user.password().equals(password)
+        if (user != null && (user.username().equals(username) && BCrypt.checkpw(password, user.password()))) {
             String authToken = UUID.randomUUID().toString();
             AuthData userAuthData = new AuthData(authToken, username);
             authDAO.createAuth(userAuthData);
