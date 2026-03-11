@@ -21,9 +21,18 @@ public class Server {
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
-        UserDAO userDAO = new MemoryUserDAO();
-        AuthDAO authDAO = new MemoryAuthDAO();
-        GameDAO gameDAO = new MemoryGameDAO();
+        try {
+            new MySqlDataAccess();  //Initializes Database
+        } catch (DataAccessException e) {
+            System.out.println("Error: " + e);
+        }
+        UserDAO userDAO = new SQLUserDAO();
+        AuthDAO authDAO = new SQLAuthDAO();
+        GameDAO gameDAO = new SQLGameDAO();
+
+//        UserDAO userDAO = new MemoryUserDAO();
+//        AuthDAO authDAO = new MemoryAuthDAO();
+//        GameDAO gameDAO = new MemoryGameDAO();
 
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(gameDAO, authDAO);
