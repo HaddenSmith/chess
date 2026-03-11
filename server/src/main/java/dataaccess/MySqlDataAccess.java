@@ -50,7 +50,7 @@ public class MySqlDataAccess {
             }
 
         } catch (SQLException e) {
-            throw new DataAccessException("Unable to configure database");
+            throw new DataAccessException("Error: Unable to configure database");
         }
     }
 }

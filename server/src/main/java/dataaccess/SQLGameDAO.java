@@ -4,30 +4,33 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class SQLGameDAO implements GameDAO {
 
     @Override
-    public void createGame(GameData game) throws DataAccessException {
-        String statement = "INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
+    public GameData createGame(GameData game) throws DataAccessException {
+        String statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(statement)) {
+             PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setInt(1, game.gameID());
-            ps.setString(2, game.whiteUsername());
-            ps.setString(3, game.blackUsername());
-            ps.setString(4, game.gameName());
-            ps.setString(5, new Gson().toJson(game.game()));
+            ps.setString(1, game.whiteUsername());
+            ps.setString(2, game.blackUsername());
+            ps.setString(3, game.gameName());
+            ps.setString(4, new Gson().toJson(game.game()));
 
             ps.executeUpdate();
 
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                int gameID = rs.getInt(1);
+                return new GameData(gameID, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+            }
+
+            throw new DataAccessException("Error: unable to retrieve generated gameID");
         } catch (SQLException e) {
             throw new DataAccessException("Error: unable to create game");
         }
@@ -84,7 +87,7 @@ public class SQLGameDAO implements GameDAO {
             return listOfGames;
 
         } catch (SQLException e) {
-            throw new DataAccessException("Error: unable get game");
+            throw new DataAccessException("Error: unable get games");
         }
     }
 
@@ -103,7 +106,7 @@ public class SQLGameDAO implements GameDAO {
 
             int rows = ps.executeUpdate();
             if (rows == 0) {
-                throw new DataAccessException("Invalid gameID");
+                throw new DataAccessException("Error: invalid gameID");
             }
 
         } catch (SQLException e) {
