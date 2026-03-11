@@ -11,7 +11,6 @@ public class GameService {
 
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
-    private int nextGameID = 1;
 
     public GameService(GameDAO gameDAO, AuthDAO authDAO) {
         this.gameDAO = gameDAO;
@@ -24,10 +23,8 @@ public class GameService {
         }
 
         validateAuth(authToken);
-        int gameID = nextGameID++;
-        GameData game = new GameData(gameID, null, null, gameName, new ChessGame());
-        gameDAO.createGame(game);
-        return game;
+        GameData game = new GameData(0, null, null, gameName, new ChessGame());
+        return gameDAO.createGame(game);
     }
 
     public Collection<GameData> listGames(String authToken) throws DataAccessException {
