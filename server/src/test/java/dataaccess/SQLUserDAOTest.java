@@ -7,7 +7,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SQLUserDAOTest {
+public class SQLUserDAOTest extends DAOTestBase {
 
     private SQLUserDAO userDAO;
     private SQLAuthDAO authDAO;

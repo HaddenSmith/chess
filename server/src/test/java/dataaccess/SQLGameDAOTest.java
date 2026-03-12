@@ -12,23 +12,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SQLGameDAOTest {
-
-    private SQLUserDAO userDAO;
-    private SQLAuthDAO authDAO;
-    private SQLGameDAO gameDAO;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        new MySqlDataAccess();
-        userDAO = new SQLUserDAO();
-        authDAO = new SQLAuthDAO();
-        gameDAO = new SQLGameDAO();
-
-        authDAO.clear();
-        gameDAO.clear();
-        userDAO.clear();
-    }
+public class SQLGameDAOTest extends DAOTestBase {
 
     @Test
     void createGamePositive() throws Exception {

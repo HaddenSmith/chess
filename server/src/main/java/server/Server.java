@@ -26,13 +26,11 @@ public class Server {
         } catch (DataAccessException e) {
             System.out.println("Error: " + e);
         }
+
+        //If you want to use InMemory, instead of SQL Database, switch these out for the MemoryDAO's
         UserDAO userDAO = new SQLUserDAO();
         AuthDAO authDAO = new SQLAuthDAO();
         GameDAO gameDAO = new SQLGameDAO();
-
-//        UserDAO userDAO = new MemoryUserDAO();
-//        AuthDAO authDAO = new MemoryAuthDAO();
-//        GameDAO gameDAO = new MemoryGameDAO();
 
         userService = new UserService(userDAO, authDAO);
         gameService = new GameService(gameDAO, authDAO);
