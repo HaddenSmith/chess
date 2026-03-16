@@ -3,6 +3,7 @@ package client.ui;
 import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
+import chess.ChessPosition;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,31 +22,35 @@ public class ChessBoardPrinter {
     public String printBoard() {
         StringBuilder out = new StringBuilder();
 
-        /*
-        //ROW
-        int rowStart = whiteView ? 8 : 1;
-        int rowEnd = whiteView ? 1 : 8;
-        int rowStep = whiteView ? -1 : 1;
+        int rowStart = isWhiteView ? 8 : 1;
+        int rowEnd = isWhiteView ? 1 : 8;
+        int rowStep = isWhiteView ? -1 : 1;
 
-        //COL
-        int colStart = whiteView ? 1 : 8;
-        int colEnd = whiteView ? 8 : 1;
-        int colStep = whiteView ? 1 : -1;
-         */
+        int colStart = isWhiteView ? 1 : 8;
+        int colEnd = isWhiteView ? 8 : 1;
+        int colStep = isWhiteView ? 1 : -1;
 
-        out.append(buildColLabels());
+        out.append(buildColLabels()); // Top collum layer
 
-        // choose row/col direction based on whiteView
+        for(int row = rowStart; row != rowEnd + rowStep; row += rowStep) {
+            out.append(buildRowLabel(row));
 
-        // loop rows
-        // print row number
-        // loop cols
-        // get piece from chessBoard
-        // convert piece to symbol
-        // append square
-        // print row number
+            for(int col = colStart; col != colEnd + colStep; col += colStep) {
+                out.append(getSquareColor(row, col));
 
-        // print bottom column labels
+                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                if(piece != null) { // If there is a piece in that square
+                    out.append(EscapeSequences.SET_TEXT_COLOR_BLACK);
+                    out.append(getPieceSymbol(piece));
+                    out.append(EscapeSequences.RESET_TEXT_COLOR);
+                }
+
+                out.append(EscapeSequences.RESET_BG_COLOR);
+            }
+            out.append(buildRowLabel(row));
+        }
+
+        out.append(buildColLabels()); // Bottom collum layer
 
         return out.toString();
     }
@@ -73,6 +78,20 @@ public class ChessBoardPrinter {
         return out.toString();
     }
 
+    private String buildRowLabel(int num) {
+        StringBuilder out = new StringBuilder();
+
+        out.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
+        out.append(EscapeSequences.SET_TEXT_COLOR_BLACK);
+
+        out.append(" ").append(num).append(" ");
+
+        out.append(EscapeSequences.RESET_BG_COLOR);
+        out.append(EscapeSequences.RESET_TEXT_COLOR);
+
+        return out.toString();
+    }
+
     private String getPieceSymbol(ChessPiece piece) {
         if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
             if (piece.getPieceType() == ChessPiece.PieceType.KING) { return EscapeSequences.WHITE_KING; }
@@ -96,7 +115,7 @@ public class ChessBoardPrinter {
         if ((row + col) % 2 == 0) {
             return EscapeSequences.SET_BG_COLOR_WHITE;
         } else {
-            return  EscapeSequences.SET_BG_COLOR_BLACK;
+            return EscapeSequences.SET_BG_COLOR_BLACK;
         }
     }
 }
