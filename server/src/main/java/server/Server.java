@@ -5,6 +5,8 @@ import io.javalin.Javalin;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
+import request.*;
+import result.*;
 import service.*;
 
 import java.util.ArrayList;

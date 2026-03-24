@@ -1,3 +1,3 @@
-package server;
+package request;
 
 public record CreateGameRequest(String gameName) { }
