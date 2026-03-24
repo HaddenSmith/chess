@@ -1,6 +1,6 @@
 package client.ui;
 
-import result.CreateGameResult;
+import chess.ChessBoard;
 import result.GameSummary;
 import result.ListGamesResult;
 import result.UserResult;
@@ -12,7 +12,7 @@ public class Client {
     private static final Scanner reader = new Scanner(System.in);
     private static final ServerFacade serverFacade = new ServerFacade(8080);
 
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) {
         while(true) { // Pre-login UI
             System.out.println("""
                     ♕ Welcome to the 240 Chess Program ♕
@@ -33,12 +33,13 @@ public class Client {
                 System.out.println("""
                         Register - Allows you to create a new account
                         Login - Prompts you enter your username and password to login
-                        Quit - Exits the program\n""");
+                        Quit - Exits the program
+                        """);
             } else if(choice == 4) { break; } // Quit
         }
     }
 
-    private static void postLoginUI() throws Exception{
+    private static void postLoginUI() {
         while(true) {
             System.out.printf("""
                     %n♕ Hello %s ♕
@@ -54,20 +55,20 @@ public class Client {
             int choice = getInput(6);
 
             if(choice == 1) { // Play Game
-                //joinGame();
+                joinGame();
             } else if(choice == 2) { // Create Game
                 createGame();
             } else if(choice == 3) { // List Games
                 listGames();
             } else if(choice == 4) { // Observe Game
-
+                observeGame();
             } else if(choice == 5) { // Help
                 System.out.println("""
                         Play Game - Allows you to join a chess game with an open spot
                         Create Game - Creates a new chess game
                         List Games - Lists all games in the database
                         Observe Game - Allows you to observe a game
-                        Logout - Logs you out and returns you to the main prompt\n""");
+                        Logout - Logs you out and returns you to the main prompt""");
             } else if(choice == 6) { // Logout
                 logout();
                 break;
@@ -90,16 +91,16 @@ public class Client {
         }
     }
 
-    private static void register() throws Exception{
+    private static void register() {
         System.out.println("Enter in the username for the new account:");
-        String entered_username = reader.nextLine();
+        String usernameInput = reader.nextLine();
         System.out.println("Enter in the password for the new account:");
         String password = reader.nextLine();
         System.out.println("Enter in the email for the new account:");
         String email = reader.nextLine();
 
         try {
-            UserResult result = serverFacade.register(entered_username, password, email);
+            UserResult result = serverFacade.register(usernameInput, password, email);
             authToken = result.authToken();
             username = result.username();
 
@@ -113,12 +114,12 @@ public class Client {
 
     private static void login() {
         System.out.println("Enter in the username:");
-        String entered_username = reader.nextLine();
+        String usernameInput = reader.nextLine();
         System.out.println("Enter in the password:");
-        String entered_password = reader.nextLine();
+        String passwordInput = reader.nextLine();
 
         try {
-            UserResult result = serverFacade.login(entered_username, entered_password);
+            UserResult result = serverFacade.login(usernameInput, passwordInput);
             authToken = result.authToken();
             username = result.username();
 
@@ -131,28 +132,33 @@ public class Client {
         }
     }
 
-    /*private static void joinGame() {
+    private static void joinGame() {
+        System.out.println("Which game would you like to join?");
+        int gameID = getGameID();
+        if(gameID == -1) { return; }
         System.out.println("Enter in the color you wish to join as:");
         String color = reader.nextLine();
-        System.out.println("Enter in the game name:");
-        String gameID = reader.nextLine();
 
         try {
-            UserResult result = serverFacade.joinGame(authToken, color, gameID);
-            authToken = result.authToken();
-            username = result.username();
+            serverFacade.joinGame(authToken, color, gameID);
 
             System.out.println("Success!");
 
-            postLoginUI();
+            //Later add functionality
+
+            //Prints a basic chess board
+            ChessBoard board = new ChessBoard();
+            board.resetBoard();
+
+            ChessBoardPrinter printer = new ChessBoardPrinter(board, color);
+            System.out.println(printer.printBoard());
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            username = null;
         }
-    }*/
+    }
 
-    public static void createGame() throws Exception{
-        System.out.println("Enter in the name of the game");
+    public static void createGame() {
+        System.out.println("Enter in the name of the game: ");
         String gameName = reader.nextLine();
 
         try {
@@ -164,14 +170,21 @@ public class Client {
         }
     }
 
-    public static void listGames() {
+    public static ListGamesResult listGames() {
         try {
             ListGamesResult result = serverFacade.listGames(authToken);
+            int i = 1;
             for (GameSummary game : result.games()) {
-                System.out.println(game);
+                System.out.printf("%d: Game name: %s | White: %s | Black: %s%n",
+                        i++,
+                        game.gameName(),
+                        game.whiteUsername() == null ? "Open" : game.whiteUsername(),
+                        game.blackUsername() == null ? "Open" : game.blackUsername());
             }
+            return result;
         } catch (Exception e) {
             System.out.println(e.getMessage());
+            return null;
         }
     }
 
@@ -185,5 +198,38 @@ public class Client {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private static void observeGame() {
+        System.out.println("What game would you like to observe?");
+        int gameID = getGameID();
+        if(gameID == -1) { return; }
+
+        // Later add functionality
+
+        //Prints a basic chess board
+        ChessBoard board = new ChessBoard();
+        board.resetBoard();
+
+        ChessBoardPrinter printer = new ChessBoardPrinter(board, "white");
+        System.out.println(printer.printBoard());
+    }
+
+    private static int getGameID() {
+        ListGamesResult result = listGames();
+
+        if(result == null || result.games().isEmpty()) {
+            System.out.println("There are no games available");
+            return -1;
+        }
+
+        int choice = getInput(result.games().size());
+
+        int counter = 1;
+        for(GameSummary game : result.games()) {
+            if(counter == choice) { return game.gameID(); }
+            counter++;
+        }
+        return -1;
     }
 }
