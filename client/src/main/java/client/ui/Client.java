@@ -1,5 +1,8 @@
 package client.ui;
 
+import result.CreateGameResult;
+import result.GameSummary;
+import result.ListGamesResult;
 import result.UserResult;
 
 import java.util.Scanner;
@@ -35,7 +38,7 @@ public class Client {
         }
     }
 
-    private static void postLoginUI() {
+    private static void postLoginUI() throws Exception{
         while(true) {
             System.out.printf("""
                     %n♕ Hello %s ♕
@@ -51,11 +54,11 @@ public class Client {
             int choice = getInput(6);
 
             if(choice == 1) { // Play Game
-
+                //joinGame();
             } else if(choice == 2) { // Create Game
-
+                createGame();
             } else if(choice == 3) { // List Games
-
+                listGames();
             } else if(choice == 4) { // Observe Game
 
             } else if(choice == 5) { // Help
@@ -66,7 +69,7 @@ public class Client {
                         Observe Game - Allows you to observe a game
                         Logout - Logs you out and returns you to the main prompt\n""");
             } else if(choice == 6) { // Logout
-                //logout
+                logout();
                 break;
             }
         }
@@ -125,6 +128,62 @@ public class Client {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             username = null;
+        }
+    }
+
+    /*private static void joinGame() {
+        System.out.println("Enter in the color you wish to join as:");
+        String color = reader.nextLine();
+        System.out.println("Enter in the game name:");
+        String gameID = reader.nextLine();
+
+        try {
+            UserResult result = serverFacade.joinGame(authToken, color, gameID);
+            authToken = result.authToken();
+            username = result.username();
+
+            System.out.println("Success!");
+
+            postLoginUI();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            username = null;
+        }
+    }*/
+
+    public static void createGame() throws Exception{
+        System.out.println("Enter in the name of the game");
+        String gameName = reader.nextLine();
+
+        try {
+            serverFacade.createGame(authToken, gameName);
+
+            System.out.println("Success!");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void listGames() {
+        try {
+            ListGamesResult result = serverFacade.listGames(authToken);
+            for (GameSummary game : result.games()) {
+                System.out.println(game);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private static void logout() {
+        try {
+            serverFacade.logout(authToken);
+            username = null;
+            authToken = null;
+
+            System.out.println("Success!");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 }
