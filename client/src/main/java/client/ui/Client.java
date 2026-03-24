@@ -1,11 +1,15 @@
 package client.ui;
 
+import result.UserResult;
+
 import java.util.Scanner;
 public class Client {
     private static String authToken;
     private static String username;
+    private static final Scanner reader = new Scanner(System.in);
+    private static final ServerFacade serverFacade = new ServerFacade(8080);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         while(true) { // Pre-login UI
             System.out.println("""
                     ♕ Welcome to the 240 Chess Program ♕
@@ -19,11 +23,9 @@ public class Client {
             int choice = getInput(4);
 
             if(choice == 1) { // Register
-
+                register();
             } else if(choice == 2) { // Login
-                //get AuthToken and username
-
-                postLoginUI();
+                login();
             } else if(choice == 3) { // Help
                 System.out.println("""
                         Register - Allows you to create a new account
@@ -36,7 +38,7 @@ public class Client {
     private static void postLoginUI() {
         while(true) {
             System.out.printf("""
-                    ♕ Hello %s ♕
+                    %n♕ Hello %s ♕
                     
                     What would you like to do?
                     1 - Play Game
@@ -71,19 +73,58 @@ public class Client {
     }
 
     private static int getInput(int numOfChoices) {
-        Scanner reader = new Scanner(System.in);
-
         while(true) {
             try {
                 int choice = Integer.parseInt(reader.nextLine());
                 if(choice < 1 || choice > numOfChoices) {
-                    System.out.printf("Invalid number: Please input a number from 1 - %d\n", numOfChoices);
+                    System.out.printf("Invalid number: Please input a number from 1 - %d%n", numOfChoices);
                 } else {
                     return choice;
                 }
             } catch(Exception e) {
-                System.out.printf("Invalid number: Please input a number from 1 - %d\n", numOfChoices);
+                System.out.printf("Invalid number: Please input a number from 1 - %d%n", numOfChoices);
             }
+        }
+    }
+
+    private static void register() throws Exception{
+        System.out.println("Enter in the username for the new account:");
+        String entered_username = reader.nextLine();
+        System.out.println("Enter in the password for the new account:");
+        String password = reader.nextLine();
+        System.out.println("Enter in the email for the new account:");
+        String email = reader.nextLine();
+
+        try {
+            UserResult result = serverFacade.register(entered_username, password, email);
+            authToken = result.authToken();
+            username = result.username();
+
+            System.out.println("Success!");
+
+            postLoginUI();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private static void login() {
+        System.out.println("Enter in the username:");
+        String entered_username = reader.nextLine();
+        System.out.println("Enter in the password:");
+        String entered_password = reader.nextLine();
+
+        try {
+            UserResult result = serverFacade.login(entered_username, entered_password);
+            authToken = result.authToken();
+            username = result.username();
+
+            System.out.println("Success!");
+
+            postLoginUI();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            username = null;
         }
     }
 }
