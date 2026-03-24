@@ -67,7 +67,7 @@ public class ChessBoardPrinter {
 
         for(int col = 0; col < 8; col++) {
             String colLabel = colLabels.get(isWhiteView ? col : (7 - col));
-            out.append(" ").append(colLabel).append(" ");
+            out.append("\u2003").append(colLabel).append(" ");
         }
 
         out.append(EscapeSequences.EMPTY);
@@ -80,10 +80,9 @@ public class ChessBoardPrinter {
     }
 
     private String buildRowLabel(int num) {
-
         return EscapeSequences.SET_BG_COLOR_LIGHT_GREY +
                 EscapeSequences.SET_TEXT_COLOR_BLACK +
-                " " + num + " " +
+                "\u2003" + num + " " +
                 EscapeSequences.RESET_BG_COLOR +
                 EscapeSequences.RESET_TEXT_COLOR;
     }
