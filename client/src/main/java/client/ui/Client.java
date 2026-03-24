@@ -9,8 +9,8 @@ import java.util.Scanner;
 public class Client {
     private static String authToken;
     private static String username;
-    private static final Scanner reader = new Scanner(System.in);
-    private static final ServerFacade serverFacade = new ServerFacade(8080);
+    private static final Scanner READER = new Scanner(System.in);
+    private static final ServerFacade SERVER_FACADE = new ServerFacade(8080);
 
     public static void main(String[] args) {
         while(true) { // Pre-login UI
@@ -79,7 +79,7 @@ public class Client {
     private static int getInput(int numOfChoices) {
         while(true) {
             try {
-                int choice = Integer.parseInt(reader.nextLine());
+                int choice = Integer.parseInt(READER.nextLine());
                 if(choice < 1 || choice > numOfChoices) {
                     System.out.printf("Invalid number: Please input a number from 1 - %d%n", numOfChoices);
                 } else {
@@ -93,14 +93,14 @@ public class Client {
 
     private static void register() {
         System.out.println("Enter in the username for the new account:");
-        String usernameInput = reader.nextLine();
+        String usernameInput = READER.nextLine();
         System.out.println("Enter in the password for the new account:");
-        String password = reader.nextLine();
+        String password = READER.nextLine();
         System.out.println("Enter in the email for the new account:");
-        String email = reader.nextLine();
+        String email = READER.nextLine();
 
         try {
-            UserResult result = serverFacade.register(usernameInput, password, email);
+            UserResult result = SERVER_FACADE.register(usernameInput, password, email);
             authToken = result.authToken();
             username = result.username();
 
@@ -114,12 +114,12 @@ public class Client {
 
     private static void login() {
         System.out.println("Enter in the username:");
-        String usernameInput = reader.nextLine();
+        String usernameInput = READER.nextLine();
         System.out.println("Enter in the password:");
-        String passwordInput = reader.nextLine();
+        String passwordInput = READER.nextLine();
 
         try {
-            UserResult result = serverFacade.login(usernameInput, passwordInput);
+            UserResult result = SERVER_FACADE.login(usernameInput, passwordInput);
             authToken = result.authToken();
             username = result.username();
 
@@ -137,10 +137,10 @@ public class Client {
         int gameID = getGameID();
         if(gameID == -1) { return; }
         System.out.println("Enter in the color you wish to join as:");
-        String color = reader.nextLine();
+        String color = READER.nextLine();
 
         try {
-            serverFacade.joinGame(authToken, color, gameID);
+            SERVER_FACADE.joinGame(authToken, color, gameID);
 
             System.out.println("Success!");
 
@@ -159,10 +159,10 @@ public class Client {
 
     public static void createGame() {
         System.out.println("Enter in the name of the game: ");
-        String gameName = reader.nextLine();
+        String gameName = READER.nextLine();
 
         try {
-            serverFacade.createGame(authToken, gameName);
+            SERVER_FACADE.createGame(authToken, gameName);
 
             System.out.println("Success!");
         } catch (Exception e) {
@@ -172,7 +172,7 @@ public class Client {
 
     public static ListGamesResult listGames() {
         try {
-            ListGamesResult result = serverFacade.listGames(authToken);
+            ListGamesResult result = SERVER_FACADE.listGames(authToken);
             int i = 1;
             for (GameSummary game : result.games()) {
                 System.out.printf("%d: Game name: %s | White: %s | Black: %s%n",
@@ -190,7 +190,7 @@ public class Client {
 
     private static void logout() {
         try {
-            serverFacade.logout(authToken);
+            SERVER_FACADE.logout(authToken);
             username = null;
             authToken = null;
 
