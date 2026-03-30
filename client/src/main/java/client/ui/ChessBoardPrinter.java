@@ -32,8 +32,8 @@ public class ChessBoardPrinter {
         this.possibleMoves = possibleMoves;
     }
 
-    public String printBoard() {
-        StringBuilder out = new StringBuilder();
+    public void printBoard() {
+        StringBuilder boardString = new StringBuilder();
 
         int rowStart = isWhiteView ? 8 : 1;
         int rowEnd = isWhiteView ? 1 : 8;
@@ -43,30 +43,30 @@ public class ChessBoardPrinter {
         int colEnd = isWhiteView ? 8 : 1;
         int colStep = isWhiteView ? 1 : -1;
 
-        out.append(buildColLabels()); // Build top column layer
+        boardString.append(buildColLabels()); // Build top column layer
 
         for(int row = rowStart; row != rowEnd + rowStep; row += rowStep) {
-            out.append(buildRowLabel(row));
+            boardString.append(buildRowLabel(row));
 
             for(int col = colStart; col != colEnd + colStep; col += colStep) {
-                out.append(getSquareColor(row, col));
+                boardString.append(getSquareColor(row, col));
 
                 ChessPiece piece = board.getPiece(new ChessPosition(row, col));
                 if(piece != null) { // If there is a piece in that square
-                    out.append(buildPieceSymbol(piece));
+                    boardString.append(buildPieceSymbol(piece));
                 } else {
-                    out.append(EscapeSequences.EMPTY);
+                    boardString.append(EscapeSequences.EMPTY);
                 }
 
-                out.append(EscapeSequences.RESET_BG_COLOR);
+                boardString.append(EscapeSequences.RESET_BG_COLOR);
             }
 
-            out.append(buildRowLabel(row)).append("\n");
+            boardString.append(buildRowLabel(row)).append("\n");
         }
 
-        out.append(buildColLabels()); // Build bottom column layer
+        boardString.append(buildColLabels()); // Build bottom column layer
 
-        return out.toString();
+        System.out.println(boardString);
     }
 
     private String buildColLabels() {

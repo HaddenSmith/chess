@@ -150,8 +150,7 @@ public class Client {
             ChessBoard board = new ChessBoard();
             board.resetBoard();
 
-            ChessBoardPrinter printer = new ChessBoardPrinter(board, color);
-            System.out.println(printer.printBoard());
+            new ChessBoardPrinter(board, color).printBoard();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -211,8 +210,7 @@ public class Client {
         ChessBoard board = new ChessBoard();
         board.resetBoard();
 
-        ChessBoardPrinter printer = new ChessBoardPrinter(board, "white");
-        System.out.println(printer.printBoard());
+        new ChessBoardPrinter(board, "white").printBoard();
     }
 
     private static int getGameID() {
