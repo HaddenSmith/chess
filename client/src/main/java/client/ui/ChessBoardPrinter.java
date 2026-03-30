@@ -5,18 +5,31 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ChessBoardPrinter {
     private final ChessBoard board;
     private final boolean isWhiteView;
+    ChessPosition highlightedPiece = null;
+    ArrayList<ChessPosition> possibleMoves = null;
 
     public ChessBoardPrinter(ChessBoard board, String teamColor) {
         this.board = board;
 
         // If it's not black it's either a white player or just an observer that sees as if he was the white player
         this.isWhiteView = !teamColor.equalsIgnoreCase("black");
+    }
+
+    public ChessBoardPrinter(ChessBoard board, String teamColor, ChessPosition highlightedPiece, ArrayList<ChessPosition> possibleMoves) {
+        this.board = board;
+
+        // If it's not black it's either a white player or just an observer that sees as if he was the white player
+        this.isWhiteView = !teamColor.equalsIgnoreCase("black");
+
+        this.highlightedPiece = highlightedPiece;
+        this.possibleMoves = possibleMoves;
     }
 
     public String printBoard() {
@@ -90,7 +103,7 @@ public class ChessBoardPrinter {
     private String buildPieceSymbol(ChessPiece piece) {
         StringBuilder out = new StringBuilder();
 
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+        if(piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
             out.append(EscapeSequences.SET_TEXT_COLOR_RED);
             if (piece.getPieceType() == ChessPiece.PieceType.KING) { out.append(EscapeSequences.WHITE_KING); }
             if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) { out.append(EscapeSequences.WHITE_QUEEN); }
@@ -99,7 +112,7 @@ public class ChessBoardPrinter {
             if (piece.getPieceType() == ChessPiece.PieceType.ROOK) { out.append(EscapeSequences.WHITE_ROOK); }
             if (piece.getPieceType() == ChessPiece.PieceType.PAWN) { out.append(EscapeSequences.WHITE_PAWN); }
             out.append(EscapeSequences.RESET_TEXT_COLOR);
-        } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+        } else if(piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
             out.append(EscapeSequences.SET_TEXT_COLOR_BLUE);
             if (piece.getPieceType() == ChessPiece.PieceType.KING) { out.append(EscapeSequences.BLACK_KING); }
             if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) { out.append(EscapeSequences.BLACK_QUEEN); }
@@ -114,6 +127,22 @@ public class ChessBoardPrinter {
     }
 
     private String getSquareColor(int row, int col) {
+        if(highlightedPiece != null) {
+            if(highlightedPiece.getRow() == row && highlightedPiece.getColumn() == col) {
+                return EscapeSequences.SET_BG_COLOR_YELLOW;
+            }
+
+            for(ChessPosition position : possibleMoves) {
+                if(position.getRow() == row && position.getColumn() == col) {
+                    if ((row + col) % 2 == 0) {
+                        return EscapeSequences.SET_BG_COLOR_DARK_GREEN; // For black squares
+                    } else {
+                        return EscapeSequences.SET_BG_COLOR_GREEN; // For white squares
+                    }
+                }
+            }
+        }
+
         if ((row + col) % 2 == 0) {
             return EscapeSequences.SET_BG_COLOR_BLACK;
         } else {
