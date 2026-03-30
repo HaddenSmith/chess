@@ -81,12 +81,12 @@ public class Client {
             try {
                 int choice = Integer.parseInt(READER.nextLine());
                 if(choice < 1 || choice > numOfChoices) {
-                    System.out.printf("Invalid number: Please input a number from 1 - %d%n", numOfChoices);
+                    System.out.printf("Invalid input: Please input a number from 1 - %d%n", numOfChoices);
                 } else {
                     return choice;
                 }
             } catch(Exception e) {
-                System.out.printf("Invalid number: Please input a number from 1 - %d%n", numOfChoices);
+                System.out.printf("Invalid input: Please input a number from 1 - %d%n", numOfChoices);
             }
         }
     }
