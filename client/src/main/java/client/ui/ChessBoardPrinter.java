@@ -32,7 +32,7 @@ public class ChessBoardPrinter {
         this.possibleMoves = possibleMoves;
     }
 
-    public void printBoard() {
+    public String buildBoardString() {
         StringBuilder boardString = new StringBuilder();
 
         int rowStart = isWhiteView ? 8 : 1;
@@ -66,7 +66,7 @@ public class ChessBoardPrinter {
 
         boardString.append(buildColLabels()); // Build bottom column layer
 
-        System.out.println(boardString);
+        return boardString.toString();
     }
 
     private String buildColLabels() {
@@ -106,20 +106,20 @@ public class ChessBoardPrinter {
         if(piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
             out.append(EscapeSequences.SET_TEXT_COLOR_RED);
             if (piece.getPieceType() == ChessPiece.PieceType.KING) { out.append(EscapeSequences.WHITE_KING); }
-            if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) { out.append(EscapeSequences.WHITE_QUEEN); }
-            if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) { out.append(EscapeSequences.WHITE_BISHOP); }
-            if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) { out.append(EscapeSequences.WHITE_KNIGHT); }
-            if (piece.getPieceType() == ChessPiece.PieceType.ROOK) { out.append(EscapeSequences.WHITE_ROOK); }
-            if (piece.getPieceType() == ChessPiece.PieceType.PAWN) { out.append(EscapeSequences.WHITE_PAWN); }
+            else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) { out.append(EscapeSequences.WHITE_QUEEN); }
+            else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) { out.append(EscapeSequences.WHITE_BISHOP); }
+            else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) { out.append(EscapeSequences.WHITE_KNIGHT); }
+            else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) { out.append(EscapeSequences.WHITE_ROOK); }
+            else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) { out.append(EscapeSequences.WHITE_PAWN); }
             out.append(EscapeSequences.RESET_TEXT_COLOR);
         } else if(piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
             out.append(EscapeSequences.SET_TEXT_COLOR_BLUE);
             if (piece.getPieceType() == ChessPiece.PieceType.KING) { out.append(EscapeSequences.BLACK_KING); }
-            if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) { out.append(EscapeSequences.BLACK_QUEEN); }
-            if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) { out.append(EscapeSequences.BLACK_BISHOP); }
-            if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) { out.append(EscapeSequences.BLACK_KNIGHT); }
-            if (piece.getPieceType() == ChessPiece.PieceType.ROOK) { out.append(EscapeSequences.BLACK_ROOK); }
-            if (piece.getPieceType() == ChessPiece.PieceType.PAWN) { out.append(EscapeSequences.BLACK_PAWN); }
+            else if (piece.getPieceType() == ChessPiece.PieceType.QUEEN) { out.append(EscapeSequences.BLACK_QUEEN); }
+            else if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) { out.append(EscapeSequences.BLACK_BISHOP); }
+            else if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT) { out.append(EscapeSequences.BLACK_KNIGHT); }
+            else if (piece.getPieceType() == ChessPiece.PieceType.ROOK) { out.append(EscapeSequences.BLACK_ROOK); }
+            else if (piece.getPieceType() == ChessPiece.PieceType.PAWN) { out.append(EscapeSequences.BLACK_PAWN); }
             out.append(EscapeSequences.RESET_TEXT_COLOR);
         }
 
@@ -132,12 +132,14 @@ public class ChessBoardPrinter {
                 return EscapeSequences.SET_BG_COLOR_YELLOW;
             }
 
-            for(ChessPosition position : possibleMoves) {
-                if(position.getRow() == row && position.getColumn() == col) {
-                    if ((row + col) % 2 == 0) {
-                        return EscapeSequences.SET_BG_COLOR_DARK_GREEN; // For black squares
-                    } else {
-                        return EscapeSequences.SET_BG_COLOR_GREEN; // For white squares
+            if(possibleMoves != null) {
+                for (ChessPosition position : possibleMoves) {
+                    if (position.getRow() == row && position.getColumn() == col) {
+                        if ((row + col) % 2 == 0) {
+                            return EscapeSequences.SET_BG_COLOR_DARK_GREEN; // For black squares
+                        } else {
+                            return EscapeSequences.SET_BG_COLOR_GREEN; // For white squares
+                        }
                     }
                 }
             }
