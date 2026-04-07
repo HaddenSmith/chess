@@ -22,9 +22,15 @@ public class WsHandler {
             UserGameCommand command = gson.fromJson(ctx.message(), UserGameCommand.class);
             System.out.println("Parsed command: " + command.getCommandType());
 
-            ServerMessage response = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+            switch (command.getCommandType()) {
+                case CONNECT -> {
+                    System.out.println("User connected to game " + command.getGameID());
 
-            ctx.send(gson.toJson(response));
+                    ServerMessage response = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+
+                    ctx.send(gson.toJson(response));
+                }
+            }
         } catch (Exception e) {
             ctx.send("Error processing message");
         }

@@ -1,9 +1,12 @@
 package client.ui;
 
 import chess.ChessBoard;
+import com.google.gson.Gson;
 import result.GameSummary;
 import result.ListGamesResult;
 import result.UserResult;
+import websocket.WsClient;
+import websocket.commands.UserGameCommand;
 
 import java.util.Scanner;
 public class Client {
@@ -11,6 +14,8 @@ public class Client {
     private static String username;
     private static final Scanner READER = new Scanner(System.in);
     private static final ServerFacade SERVER_FACADE = new ServerFacade(8080);
+    private static WsClient wsClient;
+    private static final Gson GSON = new Gson();
 
     public static void main(String[] args) {
         while(true) { // Pre-login UI
@@ -119,6 +124,12 @@ public class Client {
         String passwordInput = READER.nextLine();
 
         try {
+            wsClient = new WsClient(8080); //Initialize websocket connection
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        try {
             UserResult result = SERVER_FACADE.login(usernameInput, passwordInput);
             authToken = result.authToken();
             username = result.username();
@@ -140,7 +151,11 @@ public class Client {
         String color = READER.nextLine();
 
         try {
+            //SQL DataBase
             SERVER_FACADE.joinGame(authToken, color, gameID);
+
+            //Websocket
+            wsClient.send(GSON.toJson(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID)));
 
             System.out.println("Success!");
 
