@@ -293,9 +293,7 @@ public class Client {
 
     private static void showLegalMoves() {
         System.out.println("Enter in the space of the chess piece you want to see the valid moves of (Example: b4):");
-        String pieceInput = READER.nextLine();
-
-        ChessPosition position = parsePosition(pieceInput);
+        ChessPosition position = parsePosition();
 
         try {
             UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.GET_LEGAL_MOVES, authToken, currentGameID, position);
@@ -344,12 +342,20 @@ public class Client {
         }
     }
 
-    private static ChessPosition parsePosition(String input) {
-        char colChar = input.charAt(0);
-        int row = Character.getNumericValue(input.charAt(1));
+    private static ChessPosition parsePosition() {
+        while(true) {
+            String pieceInput = READER.nextLine();
+            boolean doesMatch = pieceInput.matches("\\b[a-h][1-8]\\b");
+            if(doesMatch) {
+                char colChar = pieceInput.charAt(0);
+                int row = Character.getNumericValue(pieceInput.charAt(1));
 
-        int col = colChar - 'a' + 1;
+                int col = colChar - 'a' + 1;
 
-        return new ChessPosition(row, col);
+                return new ChessPosition(row, col);
+            } else {
+                System.out.println("Error: Invalid chess notation. Example: b6");
+            }
+        }
     }
 }
