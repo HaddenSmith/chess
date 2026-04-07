@@ -72,5 +72,37 @@ public class GameService {
     public GameData getGame(int gameID) throws DataAccessException {
         return gameDAO.getGame(gameID);
     }
+
+    public void leaveGame(int gameID, String username) throws DataAccessException {
+        GameData gameData = gameDAO.getGame(gameID);
+
+        if (gameData == null) {
+            throw new DataAccessException("Error: game not found");
+        }
+
+        String white = gameData.whiteUsername();
+        String black = gameData.blackUsername();
+
+        if (username.equals(white)) {
+            white = null;
+        } else if (username.equals(black)) {
+            black = null;
+        }
+
+        gameDAO.updateGame(new GameData(gameID, white, black, gameData.gameName(), gameData.game()));
+    }
+
+    public void resignGame(int gameID, String username) throws DataAccessException {
+        GameData gameData = gameDAO.getGame(gameID);
+
+        if (gameData == null) { throw new DataAccessException("Error: game not found"); }
+
+        ChessGame game = gameData.game();
+
+        game.setGameOver(true);
+
+        // Save updated game back to DB
+        gameDAO.updateGame(new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game));
+    }
 }
 

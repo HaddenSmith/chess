@@ -12,6 +12,8 @@ import java.net.URI;
 public class WsClient extends Endpoint {
 
     private final Session session;
+    public static ChessGame latestGame;
+    public static String playerColor;
 
     public WsClient(int port) throws Exception {
         URI uri = new URI("ws://localhost:" + port + "/ws");
@@ -25,10 +27,10 @@ public class WsClient extends Endpoint {
             ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
 
             if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-                ChessGame game = serverMessage.getGame();
-                String color = serverMessage.getColor();
+                latestGame = serverMessage.getGame();
+                playerColor = serverMessage.getColor();
 
-                ChessBoardPrinter printer = new ChessBoardPrinter(game.getBoard(), color);
+                ChessBoardPrinter printer = new ChessBoardPrinter(latestGame.getBoard(), playerColor);
 
                 System.out.println(printer.buildBoardString());
             }

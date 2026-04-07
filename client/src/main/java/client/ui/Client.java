@@ -7,12 +7,12 @@ import result.ListGamesResult;
 import result.UserResult;
 import websocket.WsClient;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
 
 import java.util.Scanner;
 public class Client {
     private static String authToken;
     private static String username;
+    private static int currentGameID;
     private static final Scanner READER = new Scanner(System.in);
     private static final ServerFacade SERVER_FACADE = new ServerFacade(8080);
     private static WsClient wsClient;
@@ -82,6 +82,42 @@ public class Client {
         }
     }
 
+    private static void gamePlayUI() {
+        while(true) {
+            System.out.println("""
+                    What would you like to do?
+                    1 - Make Move
+                    2 - Highlight Legal Moves
+                    3 - Redraw Chess Board
+                    4 - Resign
+                    5 - Help
+                    6 - Leave""");
+
+            int choice = getInput(6);
+
+            if(choice == 1) { // Make Move
+                makeMove();
+            } else if(choice == 2) { // Highlight Legal Moves
+                showLegalMoves();
+            } else if(choice == 3) { // Redraw Chess Board
+                redrawBoard();
+            } else if(choice == 4) { // Resign
+                resign();
+                break;
+            } else if(choice == 5) { // Help
+                System.out.println("""
+                        Make Move - Allows you to move a chess piece you control
+                        Highlight Legal Moves - Highlights all possible moves that a piece can make
+                        Redraw Chess Board - Redraws the chess board at its current state
+                        Resign - You willing surrender and loose the game
+                        Leave - Leave the game, leaving your spot vacant allowing another to join in your place""");
+            } else if(choice == 6) { // Leave
+                leave();
+                break;
+            }
+        }
+    }
+
     private static int getInput(int numOfChoices) {
         while(true) {
             try {
@@ -125,12 +161,6 @@ public class Client {
         String passwordInput = READER.nextLine();
 
         try {
-            wsClient = new WsClient(8080); //Initialize websocket connection
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-
-        try {
             UserResult result = SERVER_FACADE.login(usernameInput, passwordInput);
             authToken = result.authToken();
             username = result.username();
@@ -156,12 +186,15 @@ public class Client {
             SERVER_FACADE.joinGame(authToken, color, gameID);
 
             //Websocket
+            wsClient = new WsClient(8080); //Initialize websocket connection
             wsClient.send(GSON.toJson(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID)));
+
+            currentGameID = gameID;
 
             System.out.println("Success!");
 
-            //Later add functionality
-            //printCurrentBoard();
+            Thread.sleep(500); //So the chessboard prints first
+            gamePlayUI();
         } catch (Exception e) {
             System.out.println("Error: "+ e.getMessage());
         }
@@ -243,11 +276,63 @@ public class Client {
         return -1;
     }
 
-    private static void printCurrentBoard() {
+    private static void makeMove() {
+        System.out.println("Enter in the space of the chess piece you want to move (Example: b4):");
+        String pieceInput = READER.nextLine();
+
+        // Validate it is that persons piece and there is a piece there
+
+        System.out.println("Enter in the space you want to move to (Example: b4):");
+        String endSpaceInput = READER.nextLine();
+
+        // Validate if it is a valid move
+
+        // More stuff
+    }
+
+    private static void showLegalMoves() {
+        System.out.println("Enter in the space of the chess piece you want to see the valid moves of (Example: b4):");
+        String pieceInput = READER.nextLine();
+
+        // More Stuff
+    }
+
+    private static void redrawBoard() {
+        if (WsClient.latestGame == null) {
+            System.out.println("No game loaded.");
+            return;
+        }
+
+        ChessBoardPrinter printer = new ChessBoardPrinter(WsClient.latestGame.getBoard(), WsClient.playerColor);
+
+        System.out.println(printer.buildBoardString());
+    }
+
+    private static void resign() {
         try {
-            wsClient.send(GSON.toJson(new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME)));
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, currentGameID);
+            wsClient.send(GSON.toJson(command));
+
+            System.out.println("You have resigned.");
+
+            // Clean up client state
+            wsClient = null;
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error resigning: " + e.getMessage());
+        }
+    }
+
+    private static void leave() {
+        try {
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, currentGameID);
+            wsClient.send(GSON.toJson(command));
+
+            System.out.println("You have left the game.");
+
+            // Clean up client state
+            wsClient = null;
+        } catch (Exception e) {
+            System.out.println("Error leaving game: " + e.getMessage());
         }
     }
 }
