@@ -20,17 +20,20 @@ public class WsClient extends Endpoint {
         this.session = container.connectToServer(this, uri);
 
         this.session.addMessageHandler(String.class, message -> {
-            System.out.println("Raw: " + message);
+            //System.out.println("Raw: " + message);
 
             ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
 
             if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
                 ChessGame game = serverMessage.getGame();
+                String color = serverMessage.getColor();
 
-                // track actual color later
-                ChessBoardPrinter printer = new ChessBoardPrinter(game.getBoard(), "white");
+                ChessBoardPrinter printer = new ChessBoardPrinter(game.getBoard(), color);
 
                 System.out.println(printer.buildBoardString());
+            }
+            if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+                System.out.println("Notification: " + serverMessage.getMessage());
             }
         });
     }

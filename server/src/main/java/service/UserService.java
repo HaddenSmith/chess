@@ -54,4 +54,8 @@ public class UserService {
         }
         authDAO.deleteAuth(authToken);
     }
+
+    public String getUsername(String authToken) throws DataAccessException {
+        return authDAO.getAuth(authToken).username();
+    }
 }

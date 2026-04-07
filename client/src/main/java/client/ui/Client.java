@@ -7,6 +7,7 @@ import result.ListGamesResult;
 import result.UserResult;
 import websocket.WsClient;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.util.Scanner;
 public class Client {
@@ -160,15 +161,9 @@ public class Client {
             System.out.println("Success!");
 
             //Later add functionality
-
-            //Prints a basic chess board
-            ChessBoard board = new ChessBoard();
-            board.resetBoard();
-
-            ChessBoardPrinter printer = new ChessBoardPrinter(board, color);
-            System.out.println(printer.buildBoardString());
+            //printCurrentBoard();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error: "+ e.getMessage());
         }
     }
 
@@ -246,5 +241,13 @@ public class Client {
             counter++;
         }
         return -1;
+    }
+
+    private static void printCurrentBoard() {
+        try {
+            wsClient.send(GSON.toJson(new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME)));
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 }

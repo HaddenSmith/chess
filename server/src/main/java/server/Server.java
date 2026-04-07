@@ -50,7 +50,7 @@ public class Server {
     }
 
     private void websocket() {
-        WsHandler handler = new WsHandler(gameService);
+        WsHandler handler = new WsHandler(gameService, userService);
 
         javalin.ws("/ws", ws -> {
             ws.onConnect(handler::onConnect);
