@@ -8,6 +8,7 @@ import model.GameData;
 import request.*;
 import result.*;
 import service.*;
+import websocket.WsHandler;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,6 +39,7 @@ public class Server {
         gameService = new GameService(gameDAO, authDAO);
         clearService = new ClearService(gameDAO, authDAO, userDAO);
 
+        websocket();
         clearEndPoint();
         registerEndPoint();
         loginEndPoint();
@@ -45,6 +47,16 @@ public class Server {
         listGamesEndPoint();
         createGameEndPoint();
         joinGameEndPoint();
+    }
+
+    private void websocket() {
+        WsHandler handler = new WsHandler();
+
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(handler::onConnect);
+            ws.onMessage(handler::onMessage);
+            ws.onClose(handler::onClose);
+        });
     }
 
     private void clearEndPoint() {
