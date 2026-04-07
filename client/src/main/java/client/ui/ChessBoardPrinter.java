@@ -23,11 +23,7 @@ public class ChessBoardPrinter {
     }
 
     public ChessBoardPrinter(ChessBoard board, String teamColor, ChessPosition highlightedPiece, ArrayList<ChessPosition> possibleMoves) {
-        this.board = board;
-
-        // If it's not black it's either a white player or just an observer that sees as if he was the white player
-        this.isWhiteView = !teamColor.equalsIgnoreCase("black");
-
+        this(board, teamColor);
         this.highlightedPiece = highlightedPiece;
         this.possibleMoves = possibleMoves;
     }
