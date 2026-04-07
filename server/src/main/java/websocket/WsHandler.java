@@ -1,14 +1,23 @@
 package websocket;
 
 import com.google.gson.Gson;
+import dataaccess.GameDAO;
 import io.javalin.websocket.*;
 
+import model.GameData;
+import service.GameService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 public class WsHandler {
 
     private final Gson gson = new Gson();
+
+    private final GameService gameService;
+
+    public WsHandler(GameService gameService) {
+        this.gameService = gameService;
+    }
 
     public void onConnect(WsConnectContext ctx) {
         ctx.enableAutomaticPings();
@@ -26,7 +35,12 @@ public class WsHandler {
                 case CONNECT -> {
                     System.out.println("User connected to game " + command.getGameID());
 
-                    ServerMessage response = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+                    GameData gameData = gameService.getGame(command.getGameID());
+
+                    ServerMessage response = new ServerMessage(
+                            ServerMessage.ServerMessageType.LOAD_GAME,
+                            gameData.game()
+                    );
 
                     ctx.send(gson.toJson(response));
                 }

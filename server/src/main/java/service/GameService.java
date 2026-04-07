@@ -1,6 +1,7 @@
 package service;
 
 import chess.ChessGame;
+import chess.ChessPiece;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
@@ -66,6 +67,10 @@ public class GameService {
         if (authDAO.getAuth(authToken) == null) {
             throw new DataAccessException("Error: unauthorized");
         }
+    }
+
+    public GameData getGame(int gameID) throws DataAccessException {
+        return gameDAO.getGame(gameID);
     }
 }
 
