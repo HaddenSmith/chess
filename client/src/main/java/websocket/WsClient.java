@@ -1,13 +1,17 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import client.ui.ChessBoardPrinter;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
+import websocket.messages.LegalMovesResponse;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class WsClient extends Endpoint {
 
@@ -34,8 +38,18 @@ public class WsClient extends Endpoint {
 
                 System.out.println(printer.buildBoardString());
             }
+
             if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
                 System.out.println("Notification: " + serverMessage.getMessage());
+            }
+
+            if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LEGAL_MOVES) {
+                Gson gson = new Gson();
+                LegalMovesResponse response = gson.fromJson(gson.toJson(serverMessage.getData()), LegalMovesResponse.class);
+
+                ChessBoardPrinter printer = new ChessBoardPrinter(latestGame.getBoard(), playerColor, response.moves(), response.position());
+
+                System.out.println(printer.buildBoardString());
             }
         });
     }

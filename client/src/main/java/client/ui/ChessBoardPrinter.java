@@ -1,19 +1,17 @@
 package client.ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class ChessBoardPrinter {
     private final ChessBoard board;
     private final boolean isWhiteView;
     ChessPosition highlightedPiece = null;
-    ArrayList<ChessPosition> possibleMoves = null;
+    ArrayList<ChessMove> possibleMoves = null;
 
     public ChessBoardPrinter(ChessBoard board, String teamColor) {
         this.board = board;
@@ -22,10 +20,10 @@ public class ChessBoardPrinter {
         this.isWhiteView = !teamColor.equalsIgnoreCase("black");
     }
 
-    public ChessBoardPrinter(ChessBoard board, String teamColor, ChessPosition highlightedPiece, ArrayList<ChessPosition> possibleMoves) {
+    public ChessBoardPrinter(ChessBoard board, String teamColor, Collection<ChessMove> possibleMoves, ChessPosition highlightedPiece) {
         this(board, teamColor);
+        this.possibleMoves = new ArrayList<>(possibleMoves);
         this.highlightedPiece = highlightedPiece;
-        this.possibleMoves = possibleMoves;
     }
 
     public String buildBoardString() {
@@ -129,7 +127,8 @@ public class ChessBoardPrinter {
             }
 
             if(possibleMoves != null) {
-                for (ChessPosition position : possibleMoves) {
+                for (ChessMove move : possibleMoves) {
+                    ChessPosition position = move.getEndPosition();
                     if (position.getRow() == row && position.getColumn() == col) {
                         if ((row + col) % 2 == 0) {
                             return EscapeSequences.SET_BG_COLOR_DARK_GREEN; // For black squares

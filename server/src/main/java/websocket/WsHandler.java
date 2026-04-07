@@ -1,20 +1,18 @@
 package websocket;
 
+import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
-import dataaccess.GameDAO;
 import io.javalin.websocket.*;
 
 import model.GameData;
-import service.ClearService;
 import service.GameService;
 import service.UserService;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LegalMovesResponse;
 import websocket.messages.ServerMessage;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class WsHandler {
 
@@ -46,13 +44,7 @@ public class WsHandler {
                     String username = userService.getUsername(command.getAuthToken());
                     GameData gameData = gameService.getGame(gameID);
 
-                    String color = null;
-
-                    if (username.equals(gameData.whiteUsername())) {
-                        color = "white";
-                    } else if (username.equals(gameData.blackUsername())) {
-                        color = "black";
-                    }
+                   String color = getColor(username, gameData);
 
                     gameSessions.putIfAbsent(gameID, new HashMap<>());
                     gameSessions.get(gameID).put(username, ctx);
@@ -99,6 +91,20 @@ public class WsHandler {
                         }
                     }
                 }
+                case GET_LEGAL_MOVES -> {
+                    ChessPosition position = command.getHighlightPiecePosition();
+                    if (position == null) {
+                        System.out.println("Position is null!");
+                        return;
+                    }
+                    GameData gameData = gameService.getGame(command.getGameID());
+
+                    Collection<ChessMove> moves = gameData.game().validMoves(position);
+
+                    ServerMessage response = new ServerMessage(ServerMessage.ServerMessageType.LEGAL_MOVES, new LegalMovesResponse(position, moves));
+
+                    ctx.send(GSON.toJson(response));
+                }
             }
         } catch (Exception e) {
             ctx.send("Error processing message");
@@ -120,5 +126,16 @@ public class WsHandler {
                 entry.getValue().send(GSON.toJson(notification));
             }
         }
+    }
+
+    public String getColor(String username, GameData gameData) {
+        String color = null;
+
+        if (username.equals(gameData.whiteUsername())) {
+            color = "white";
+        } else if (username.equals(gameData.blackUsername())) {
+            color = "black";
+        }
+        return color;
     }
 }

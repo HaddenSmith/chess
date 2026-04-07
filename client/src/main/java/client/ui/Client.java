@@ -1,6 +1,7 @@
 package client.ui;
 
 import chess.ChessBoard;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import result.GameSummary;
 import result.ListGamesResult;
@@ -82,8 +83,9 @@ public class Client {
         }
     }
 
-    private static void gamePlayUI() {
+    private static void gamePlayUI() throws InterruptedException {
         while(true) {
+            Thread.sleep(500); //So the chessboard prints first
             System.out.println("""
                     What would you like to do?
                     1 - Make Move
@@ -193,7 +195,6 @@ public class Client {
 
             System.out.println("Success!");
 
-            Thread.sleep(500); //So the chessboard prints first
             gamePlayUI();
         } catch (Exception e) {
             System.out.println("Error: "+ e.getMessage());
@@ -294,7 +295,14 @@ public class Client {
         System.out.println("Enter in the space of the chess piece you want to see the valid moves of (Example: b4):");
         String pieceInput = READER.nextLine();
 
-        // More Stuff
+        ChessPosition position = parsePosition(pieceInput);
+
+        try {
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.GET_LEGAL_MOVES, authToken, currentGameID, position);
+            wsClient.send(GSON.toJson(command));
+        } catch (Exception e) {
+            System.out.println("Error resigning: " + e.getMessage());
+        }
     }
 
     private static void redrawBoard() {
@@ -334,5 +342,14 @@ public class Client {
         } catch (Exception e) {
             System.out.println("Error leaving game: " + e.getMessage());
         }
+    }
+
+    private static ChessPosition parsePosition(String input) {
+        char colChar = input.charAt(0);
+        int row = Character.getNumericValue(input.charAt(1));
+
+        int col = colChar - 'a' + 1;
+
+        return new ChessPosition(row, col);
     }
 }
