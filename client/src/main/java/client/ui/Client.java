@@ -1,6 +1,5 @@
 package client.ui;
 
-import chess.ChessBoard;
 import chess.ChessPosition;
 import com.google.gson.Gson;
 import result.GameSummary;
@@ -307,17 +306,19 @@ public class Client {
     }
 
     private static void makeMove() {
-        System.out.println("Enter in the space of the chess piece you want to move (Example: b4):");
-        String pieceInput = READER.nextLine();
+        System.out.println("Enter piece to move (e.g., b2):");
+        ChessPosition start = parsePosition();
 
-        // Validate it is that persons piece and there is a piece there
+        System.out.println("Enter destination (e.g., b4):");
+        ChessPosition end = parsePosition();
 
-        System.out.println("Enter in the space you want to move to (Example: b4):");
-        String endSpaceInput = READER.nextLine();
+        try {
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameID, start, end);
 
-        // Validate if it is a valid move
-
-        // More stuff
+            wsClient.send(GSON.toJson(command));
+        } catch (Exception e) {
+            System.out.println("Error making move: " + e.getMessage());
+        }
     }
 
     private static void showLegalMoves() {

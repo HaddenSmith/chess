@@ -16,6 +16,8 @@ public class UserGameCommand {
     private final String authToken;
     private final Integer gameID;
     private ChessPosition highlightPiecePosition;
+    private ChessPosition startPosition;
+    private ChessPosition endPosition;
 
     public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
         this.commandType = commandType;
@@ -26,6 +28,12 @@ public class UserGameCommand {
     public UserGameCommand(CommandType commandType, String authToken, Integer gameID, ChessPosition highlightPiecePosition) {
         this(commandType, authToken, gameID);
         this.highlightPiecePosition = highlightPiecePosition;
+    }
+
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, ChessPosition startPosition, ChessPosition endPosition) {
+        this(commandType, authToken, gameID);
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
     }
 
     public enum CommandType {
@@ -50,6 +58,14 @@ public class UserGameCommand {
 
     public ChessPosition getHighlightPiecePosition() {
         return highlightPiecePosition;
+    }
+
+    public ChessPosition getStartPosition() {
+        return startPosition;
+    }
+
+    public ChessPosition getEndPosition() {
+        return endPosition;
     }
 
     @Override

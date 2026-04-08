@@ -1,8 +1,10 @@
 package websocket;
 
+import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import io.javalin.websocket.*;
 
 import model.GameData;
@@ -105,18 +107,98 @@ public class WsHandler {
 
                     ctx.send(GSON.toJson(response));
                 }
+                case MAKE_MOVE -> {
+                    String username = userService.getUsername(command.getAuthToken());
+                    int gameID = command.getGameID();
+
+                    ChessPosition start = command.getStartPosition();
+                    ChessPosition end = command.getEndPosition();
+
+                    if (start == null || end == null) {
+                        ctx.send(GSON.toJson(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move input")));
+                        return;
+                    }
+
+                    GameData gameData = gameService.getGame(gameID);
+                    ChessGame game = gameData.game();
+
+                    if (game.isInCheckmate(ChessGame.TeamColor.WHITE) || game.isInCheckmate(ChessGame.TeamColor.BLACK) ||
+                            game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                        ctx.send(GSON.toJson(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Game is already over")));
+                        return;
+                    }
+
+                    ChessGame.TeamColor turn = game.getTeamTurn();
+                    ChessGame.TeamColor opponent = turn == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+
+                    try {
+                        ChessMove move = new ChessMove(start, end, null);
+
+                        game.makeMove(move);
+
+                        if (game.isInCheckmate(opponent)) {
+                            notifyOthers("Checkmate! " + opponent + " loses.", gameID, null);
+                        }
+                        else if (game.isInStalemate(opponent)) {
+                            notifyOthers("Stalemate! Game is a draw.", gameID, null);
+                        }
+                        else if (game.isInCheck(opponent)) {
+                            notifyOthers(opponent + " is in check!", gameID, null);
+                        }
+
+                        gameService.updateGame(gameID, game);
+
+                        String message = String.format("%s moved from %s to %s", username, toChessNotation(start), toChessNotation(end));
+                        notifyOthers(message, gameID, username);
+
+                        // Send updated board to EVERYONE (including sender)
+                        ServerMessage load = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game, null);
+
+                        Map<String, WsContext> sessions = gameSessions.get(gameID);
+                        if (sessions != null) {
+                            for (WsContext sessionCtx : sessions.values()) {
+                                sessionCtx.send(GSON.toJson(load));
+                            }
+                        }
+
+                    } catch (Exception e) {
+                        ctx.send(GSON.toJson(
+                                new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move")
+                        ));
+                    }
+                }
             }
         } catch (Exception e) {
             ctx.send("Error processing message");
         }
     }
 
-    public void onClose(WsCloseContext ctx) {
+    public void onClose(WsCloseContext ctx) throws DataAccessException {
         System.out.println("Closed");
 
-//        for (Set<WsContext> sessions : gameSessions.values()) {
-//            sessions.remove(ctx);
-//        }
+        for (Map.Entry<Integer, Map<String, WsContext>> gameEntry : gameSessions.entrySet()) {
+            Integer gameID = gameEntry.getKey();
+            Map<String, WsContext> sessions = gameEntry.getValue();
+
+            String removedUser = null;
+
+            for (Map.Entry<String, WsContext> entry : sessions.entrySet()) {
+                if (entry.getValue().equals(ctx)) {
+                    removedUser = entry.getKey();
+                    break;
+                }
+            }
+
+            if (removedUser != null) {
+                sessions.remove(removedUser);
+                gameService.leaveGame(gameID, removedUser);
+
+                notifyOthers(String.format("%s disconnected.", removedUser), gameID, removedUser);
+                if (sessions.isEmpty()) { gameSessions.remove(gameID); }
+
+                break;
+            }
+        }
     }
 
     private void notifyOthers(String message, int gameID, String username) {
@@ -137,5 +219,11 @@ public class WsHandler {
             color = "black";
         }
         return color;
+    }
+
+    private String toChessNotation(ChessPosition pos) {
+        char col = (char) ('a' + pos.getColumn() - 1);
+        int row = pos.getRow();
+        return "" + col + row;
     }
 }

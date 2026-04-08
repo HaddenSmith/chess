@@ -32,10 +32,9 @@ public class WsClient extends Endpoint {
 
             if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
                 latestGame = serverMessage.getGame();
-                playerColor = serverMessage.getColor();
+                if (serverMessage.getColor() != null) { playerColor = serverMessage.getColor(); }
 
                 ChessBoardPrinter printer = new ChessBoardPrinter(latestGame.getBoard(), playerColor);
-
                 System.out.println(printer.buildBoardString());
             }
 

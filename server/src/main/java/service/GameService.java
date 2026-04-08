@@ -104,5 +104,13 @@ public class GameService {
         // Save updated game back to DB
         gameDAO.updateGame(new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game));
     }
+
+    public void updateGame(int gameID, ChessGame game) throws DataAccessException {
+        GameData old = gameDAO.getGame(gameID);
+
+        GameData updated = new GameData(gameID, old.whiteUsername(), old.blackUsername(), old.gameName(), game);
+
+        gameDAO.updateGame(updated);
+    }
 }
 
