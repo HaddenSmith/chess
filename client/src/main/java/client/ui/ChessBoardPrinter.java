@@ -121,25 +121,41 @@ public class ChessBoardPrinter {
     }
 
     private String getSquareColor(int row, int col) {
-        if(highlightedPiece != null) {
-            if(highlightedPiece.getRow() == row && highlightedPiece.getColumn() == col) {
+        if (highlightedPiece != null) {
+            if (highlightedPiece.getRow() == row && highlightedPiece.getColumn() == col) {
                 return EscapeSequences.SET_BG_COLOR_YELLOW;
             }
 
-            if(possibleMoves != null) {
-                for (ChessMove move : possibleMoves) {
-                    ChessPosition position = move.getEndPosition();
-                    if (position.getRow() == row && position.getColumn() == col) {
-                        if ((row + col) % 2 == 0) {
-                            return EscapeSequences.SET_BG_COLOR_DARK_GREEN; // For black squares
-                        } else {
-                            return EscapeSequences.SET_BG_COLOR_GREEN; // For white squares
-                        }
-                    }
-                }
+            if (isPossibleMove(row, col)) {
+                return getMoveHighlightColor(row, col);
             }
         }
 
+        return getDefaultSquareColor(row, col);
+    }
+
+    private boolean isPossibleMove(int row, int col) {
+        if (possibleMoves == null) { return false; }
+
+        for (ChessMove move : possibleMoves) {
+            ChessPosition pos = move.getEndPosition();
+            if (pos.getRow() == row && pos.getColumn() == col) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private String getMoveHighlightColor(int row, int col) {
+        if ((row + col) % 2 == 0) {
+            return EscapeSequences.SET_BG_COLOR_DARK_GREEN;
+        } else {
+            return EscapeSequences.SET_BG_COLOR_GREEN;
+        }
+    }
+
+    private String getDefaultSquareColor(int row, int col) {
         if ((row + col) % 2 == 0) {
             return EscapeSequences.SET_BG_COLOR_BLACK;
         } else {
