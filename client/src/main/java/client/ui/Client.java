@@ -104,8 +104,15 @@ public class Client {
             } else if(choice == 3) { // Redraw Chess Board
                 redrawBoard();
             } else if(choice == 4) { // Resign
-                resign();
-                break;
+                System.out.println("""
+                        Are you sure you want to resign?
+                        Enter 1 to resign
+                        Ender 2 to cancel""");
+                choice = getInput(2);
+                if(choice == 1) {
+                    resign();
+                    break;
+                }
             } else if(choice == 5) { // Help
                 System.out.println("""
                         Make Move - Allows you to move a chess piece you control
@@ -114,8 +121,15 @@ public class Client {
                         Resign - You willing surrender and loose the game
                         Leave - Leave the game, leaving your spot vacant allowing another to join in your place""");
             } else if(choice == 6) { // Leave
-                leave();
-                break;
+                System.out.println("""
+                        Are you sure you want to leave?
+                        Enter 1 to leave
+                        Ender 2 to cancel""");
+                choice = getInput(2);
+                if(choice == 1) {
+                    leave();
+                    break;
+                }
             }
         }
     }
@@ -321,7 +335,6 @@ public class Client {
 
             System.out.println("You have resigned.");
 
-            // Clean up client state
             wsClient = null;
         } catch (Exception e) {
             System.out.println("Error resigning: " + e.getMessage());
@@ -335,7 +348,6 @@ public class Client {
 
             System.out.println("You have left the game.");
 
-            // Clean up client state
             wsClient = null;
         } catch (Exception e) {
             System.out.println("Error leaving game: " + e.getMessage());
@@ -345,11 +357,11 @@ public class Client {
     private static ChessPosition parsePosition() {
         while(true) {
             String pieceInput = READER.nextLine();
-            boolean doesMatch = pieceInput.matches("\\b[a-h][1-8]\\b");
-            if(doesMatch) {
-                char colChar = pieceInput.charAt(0);
-                int row = Character.getNumericValue(pieceInput.charAt(1));
+            boolean doesMatch = pieceInput.matches("\\b[a-h|A-H][1-8]\\b");
 
+            if(doesMatch) {
+                char colChar = Character.toLowerCase(pieceInput.charAt(0));
+                int row = Character.getNumericValue(pieceInput.charAt(1));
                 int col = colChar - 'a' + 1;
 
                 return new ChessPosition(row, col);
