@@ -72,7 +72,7 @@ public class WsHandler {
                     }
                 }
 
-                if (foundGameID != null) break;
+                if (foundGameID != null) { break; }
             }
 
             if (foundGameID == null || foundUsername == null) {
@@ -82,11 +82,9 @@ public class WsHandler {
 
             Map<String, WsContext> session = gameSessions.get(foundGameID);
 
-            if (session != null) {
-                session.remove(foundUsername);
-
-                if (session.isEmpty()) { gameSessions.remove(foundGameID); }
-            }
+            if (session == null) { return; }
+            session.remove(foundUsername);
+            if (session.isEmpty()) { gameSessions.remove(foundGameID); }
 
             try {
                 gameService.leaveGame(foundGameID, foundUsername);
@@ -94,9 +92,8 @@ public class WsHandler {
                 System.out.println("Failed to remove user from game: " + e.getMessage());
             }
 
-            if (session != null) {
-                sendNotification(foundUsername + " disconnected.", foundGameID, foundUsername, false);
-            }
+            sendNotification(foundUsername + " disconnected.", foundGameID, foundUsername, false);
+
         } catch (Exception e) {
             System.out.println("onClose error: " + e.getMessage());
         }
@@ -128,11 +125,9 @@ public class WsHandler {
         gameService.leaveGame(gameID, username);
 
         Map<String, WsContext> session = gameSessions.get(gameID);
-        if (session != null) {
-            session.remove(username);
-
-            if (session.isEmpty()) { gameSessions.remove(gameID); }
-        }
+        if (session == null) { return; }
+        session.remove(username);
+        if (session.isEmpty()) { gameSessions.remove(gameID); }
 
         sendNotification(String.format("%s has left the game.", username), gameID, username, false);
     }
