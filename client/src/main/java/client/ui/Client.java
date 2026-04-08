@@ -1,5 +1,6 @@
 package client.ui;
 
+import chess.ChessPiece;
 import chess.ChessPosition;
 import com.google.gson.Gson;
 import result.GameSummary;
@@ -313,8 +314,12 @@ public class Client {
         System.out.println("Enter destination (e.g., b4):");
         ChessPosition end = parsePosition();
 
+        System.out.println("If piece is a pawn about to be promoted, please enter in the piece you would like it to be promoted to.");
+        System.out.println("If not then just press enter");
+        ChessPiece.PieceType promotion = parsePiece();
+
         try {
-            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameID, new Move(start, end));
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameID, new Move(start, end, promotion));
 
             wsClient.send(GSON.toJson(command));
         } catch (Exception e) {
@@ -386,6 +391,22 @@ public class Client {
                 return new ChessPosition(row, col);
             } else {
                 System.out.println("Error: Invalid chess notation. Example: b6");
+            }
+        }
+    }
+
+    private static ChessPiece.PieceType parsePiece() {
+        while(true) {
+            String input = READER.nextLine().toLowerCase();
+
+            if (input.isEmpty()) { return null; }
+            else if (input.equals("queen")) { return ChessPiece.PieceType.QUEEN; }
+            else if (input.equals("knight")) { return ChessPiece.PieceType.KNIGHT; }
+            else if (input.equals("bishop")) { return ChessPiece.PieceType.BISHOP; }
+            else if (input.equals("rook")) { return ChessPiece.PieceType.ROOK; }
+            else if (input.equals("pawn")) { return ChessPiece.PieceType.PAWN; }
+            else {
+                System.out.println("Please enter in nothing or a chess piece");
             }
         }
     }

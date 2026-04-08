@@ -216,7 +216,7 @@ public class WsHandler {
         }
 
         try {
-            ChessMove move = new ChessMove(start, end, null);
+            ChessMove move = new ChessMove(start, end, command.getMove().promotionType());
 
             game.makeMove(move);
 
