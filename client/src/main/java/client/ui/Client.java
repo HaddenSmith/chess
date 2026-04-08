@@ -14,6 +14,7 @@ public class Client {
     private static String authToken;
     private static String username;
     private static int currentGameID;
+    private static boolean isObserver = false;
     private static final Scanner READER = new Scanner(System.in);
     private static final ServerFacade SERVER_FACADE = new ServerFacade(8080);
     private static WsClient wsClient;
@@ -98,20 +99,28 @@ public class Client {
             int choice = getInput(6);
 
             if(choice == 1) { // Make Move
-                makeMove();
+                if(!isObserver) {
+                    makeMove();
+                } else {
+                    System.out.println("Observers cannot make moves or resign.");
+                }
             } else if(choice == 2) { // Highlight Legal Moves
                 showLegalMoves();
             } else if(choice == 3) { // Redraw Chess Board
                 redrawBoard();
             } else if(choice == 4) { // Resign
-                System.out.println("""
-                        Are you sure you want to resign?
-                        Enter 1 to resign
-                        Ender 2 to cancel""");
-                choice = getInput(2);
-                if(choice == 1) {
-                    resign();
-                    break;
+                if(!isObserver) {
+                    System.out.println("""
+                            Are you sure you want to resign?
+                            Enter 1 to resign
+                            Ender 2 to cancel""");
+                    choice = getInput(2);
+                    if (choice == 1) {
+                        resign();
+                        break;
+                    }
+                } else {
+                    System.out.println("Observers cannot make moves or resign.");
                 }
             } else if(choice == 5) { // Help
                 System.out.println("""
@@ -198,14 +207,14 @@ public class Client {
         String color = READER.nextLine();
 
         try {
+            currentGameID = gameID;
+
             //SQL DataBase
             SERVER_FACADE.joinGame(authToken, color, gameID);
 
             //Websocket
-            wsClient = new WsClient(8080); //Initialize websocket connection
+            wsClient = new WsClient(8080); // Initialize websocket connection
             wsClient.send(GSON.toJson(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID)));
-
-            currentGameID = gameID;
 
             System.out.println("Success!");
 
@@ -261,16 +270,22 @@ public class Client {
     private static void observeGame() {
         System.out.println("What game would you like to observe?");
         int gameID = getGameID();
-        if(gameID == -1) { return; }
+        if (gameID == -1) { return; }
 
-        // Later add functionality
+        try {
+            currentGameID = gameID;
+            isObserver = true;
 
-        //Prints a basic chess board
-        ChessBoard board = new ChessBoard();
-        board.resetBoard();
+            wsClient = new WsClient(8080); // Initialize websocket connection
 
-        ChessBoardPrinter printer = new ChessBoardPrinter(board, "white");
-        System.out.println(printer.buildBoardString());
+            wsClient.send(GSON.toJson(new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID)));
+
+            System.out.println("Observing game...");
+
+            gamePlayUI(); // reuse same UI (totally fine)
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     private static int getGameID() {
@@ -343,6 +358,8 @@ public class Client {
 
     private static void leave() {
         try {
+            isObserver = false;
+
             UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, currentGameID);
             wsClient.send(GSON.toJson(command));
 

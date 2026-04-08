@@ -54,7 +54,8 @@ public class WsHandler {
                     ctx.send(GSON.toJson(load));
 
                     // Notify others
-                    notifyOthers(String.format("%s joined the game as %s", username, color), gameID, username);
+                    String role = (color == null) ? "observer" : color;
+                    notifyOthers(String.format("%s joined the game as %s", username, role), gameID, username);
                 }
                 case LEAVE -> {
                     String username = userService.getUsername(command.getAuthToken());
@@ -75,12 +76,11 @@ public class WsHandler {
                 case RESIGN -> {
                     String username = userService.getUsername(command.getAuthToken());
                     int gameID = command.getGameID();
+                    GameData gameData = gameService.getGame(gameID);
 
                     gameService.resignGame(gameID, username);
 
                     notifyOthers(String.format("%s has resigned. Game over.", username), gameID, username);
-
-                    GameData gameData = gameService.getGame(gameID);
 
                     ServerMessage load = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData.game(), null);
 

@@ -51,6 +51,10 @@ public class WsClient extends Endpoint {
 
                 System.out.println(printer.buildBoardString());
             }
+
+            if (serverMessage.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+                System.out.println("Error: " + serverMessage.getMessage());
+            }
         });
     }
 
