@@ -6,6 +6,7 @@ import result.GameSummary;
 import result.ListGamesResult;
 import result.UserResult;
 import websocket.WsClient;
+import websocket.commands.Move;
 import websocket.commands.UserGameCommand;
 
 import java.util.Scanner;
@@ -313,7 +314,7 @@ public class Client {
         ChessPosition end = parsePosition();
 
         try {
-            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameID, start, end);
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameID, new Move(start, end));
 
             wsClient.send(GSON.toJson(command));
         } catch (Exception e) {

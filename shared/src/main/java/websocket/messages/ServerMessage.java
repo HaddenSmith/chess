@@ -16,6 +16,7 @@ public class ServerMessage {
     ServerMessageType serverMessageType;
     private ChessGame game;
     private String message;
+    private String errorMessage;
     private String color;
     private Object data;
 
@@ -26,10 +27,6 @@ public class ServerMessage {
         LEGAL_MOVES
     }
 
-    public ServerMessage(ServerMessageType type) {
-        this.serverMessageType = type;
-    }
-
     public ServerMessage(ServerMessageType type, ChessGame game, String color) {
         this.serverMessageType = type;
         this.game = game;
@@ -38,7 +35,11 @@ public class ServerMessage {
 
     public ServerMessage(ServerMessageType type, String message) {
         this.serverMessageType = type;
-        this.message = message;
+        if(type == ServerMessageType.ERROR) {
+            this.errorMessage = message;
+        } else {
+            this.message = message;
+        }
     }
 
     public ServerMessage(ServerMessageType type, Object data) {
