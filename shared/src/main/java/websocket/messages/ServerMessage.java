@@ -1,9 +1,7 @@
 package websocket.messages;
 
 import chess.ChessGame;
-import chess.ChessMove;
 
-import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -56,7 +54,7 @@ public class ServerMessage {
     }
 
     public String getMessage() {
-        return message;
+        return message == null ? errorMessage : message;
     }
 
     public String getColor() {
